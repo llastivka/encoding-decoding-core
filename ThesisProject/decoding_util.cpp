@@ -19,6 +19,7 @@ string DecodingUtil::decode(string bitStream)
 			int pair = getDecimalFromBinaryString(bitStream.substr(currentPosition, BIT_NUM));
 			int first = pair / 45;
 			int second = pair % 45;
+			//add here some check later so that it didn't throw error if first or second
 			decoded += alphanumericValuesMap.find(first)->second;
 			decoded += alphanumericValuesMap.find(second)->second;
 			currentPosition += BIT_NUM;
@@ -70,14 +71,15 @@ int DecodingUtil::getPaletteIndex(std::vector<Coder::color> palette, Coder::colo
 			index = i;
 		}
 	}
+	//here add check for the case when the minDiff is still too large to be classified correctly
 	return index;
 }
 
 string DecodingUtil::getBitStreamFrom2DCode(Mat code)
 {
-	int threshold = 50;
-	int upThreshold = 255 - threshold;
+	int threshold = 10;
 	std::vector<color> moduleColorSums(getModulesNumber());
+	std::vector<int> moduleColorNums(getModulesNumber());
 	for (int r = 0; r < code.rows; r++)
 	{
 		for (int c = 0; c < code.cols; c++)
@@ -86,12 +88,12 @@ string DecodingUtil::getBitStreamFrom2DCode(Mat code)
 			int currentB = code.at<cv::Vec3b>(r, c)[0];
 			int currentG = code.at<cv::Vec3b>(r, c)[1];
 			int currentR = code.at<cv::Vec3b>(r, c)[2];
-			if (currentB > threshold && currentB < upThreshold && currentG > threshold && currentG < upThreshold &&
-				currentR > threshold && currentR < upThreshold)
+			if (abs(currentB - currentG) > threshold || abs(currentB - currentR) > threshold || abs(currentR - currentG) > threshold)
 			{
-				moduleColorSums.at(index).b += code.at<cv::Vec3b>(r, c)[0];
-				moduleColorSums.at(index).g += code.at<cv::Vec3b>(r, c)[1];
-				moduleColorSums.at(index).r += code.at<cv::Vec3b>(r, c)[2];
+				moduleColorSums[index].b += currentB;
+				moduleColorSums[index].g += currentG;
+				moduleColorSums[index].r += currentR;
+				moduleColorNums[index]++;
 			}
 		}
 	}
@@ -99,9 +101,9 @@ string DecodingUtil::getBitStreamFrom2DCode(Mat code)
 	std::vector<color> moduleColorAverages(getModulesNumber());
 	for (int i = 0; i < getModulesNumber(); i++)
 	{
-		moduleColorAverages[i].b = moduleColorSums[i].b / moduleColorAverages.size();
-		moduleColorAverages[i].g = moduleColorSums[i].g / moduleColorAverages.size();
-		moduleColorAverages[i].r = moduleColorSums[i].r / moduleColorAverages.size();
+		moduleColorAverages[i].b = moduleColorSums[i].b / moduleColorNums[i];
+		moduleColorAverages[i].g = moduleColorSums[i].g / moduleColorNums[i];
+		moduleColorAverages[i].r = moduleColorSums[i].r / moduleColorNums[i];
 	}
 
 	bool allPaletteInFirstLine = COLOR_NUMBER + 1 < codeSide;
@@ -120,11 +122,16 @@ string DecodingUtil::getBitStreamFrom2DCode(Mat code)
 		{
 			paletteInCode.push_back(moduleColorAverages[i]);
 			paletteColorAmountInCode.push_back(1); //bc for now it is only palette color itself (of this color)
+			//std::cout << "palette color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
+			//	", r - " << moduleColorAverages[i].r << endl;
 		}
 		else
 		{
 			color currentColor = moduleColorAverages[i];
+			//std::cout << "current color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
+			//	", r - " << moduleColorAverages[i].r << endl;
 			int paletteIndex = getPaletteIndex(paletteInCode, currentColor);
+			//std::cout << "decided module color: " << paletteIndex << endl;
 			colorIndexSequence.push_back(paletteIndex);
 			bitStream.append(getBinaryAsString(paletteIndex).substr(BIT_NUM - BITS_IN_MODULE, BITS_IN_MODULE));
 			paletteColorAmountInCode[paletteIndex]++;

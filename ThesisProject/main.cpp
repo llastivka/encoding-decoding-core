@@ -7,7 +7,7 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
-	Mat image = imread("lena_grid.png", IMREAD_COLOR);
+	Mat image = imread("lena_saturation.png", IMREAD_COLOR);
 
 	ErrorCorrector errorCorrector = ErrorCorrector();
 	int modulesNumber = 100;
@@ -28,6 +28,7 @@ int main(int argc, char const *argv[])
 	string bitStream = decoder.getBitStreamFrom2DCode(image);
 	cout << bitStream << endl;
 	string decoded = decoder.decode(bitStream);
+	cout << decoded << endl;
 
 	/*
 	//inputQuad is what will be passed from the app (at least at this stage)
