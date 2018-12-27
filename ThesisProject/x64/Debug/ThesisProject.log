@@ -1,0 +1,3 @@
+﻿  decoding_util.cpp
+c:\users\kdram\source\repos\thesisproject\thesisproject\decoding_util.cpp(69): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+  ThesisProject.vcxproj -> C:\Users\kdram\source\repos\ThesisProject\x64\Debug\ThesisProject.exe
