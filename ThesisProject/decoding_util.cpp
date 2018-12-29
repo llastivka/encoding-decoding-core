@@ -27,7 +27,14 @@ string DecodingUtil::decode(string bitStream)
 		else
 		{
 			int last = getDecimalFromBinaryString(bitStream.substr(currentPosition, SHORT_BIT_NUM));
-			decoded += alphanumericValuesMap.find(last)->second;
+			if (last > 0 && last < 45)
+			{
+				decoded += alphanumericValuesMap.find(last)->second;
+			}
+			else
+			{
+				std::cout << "Decoding error! Alphanumeric symbol code can not be " << last << endl;
+			}
 			currentPosition += SHORT_BIT_NUM;
 		}
 		i++;
@@ -44,11 +51,11 @@ string DecodingUtil::decode(string bitStream)
 		currentPosition += BYTE_BIT_NUM;
 	}
 
-	/*if (!checkErrorCorrection(decoded, errorCorrectionCodeword))
+	if (!checkErrorCorrection(decoded, errorCorrectionCodeword))
 	{
 		std::cout << "Error correction check failed";
 		return "";
-	}*/
+	}
 	
 	return decoded;
 }
@@ -80,6 +87,7 @@ string DecodingUtil::getBitStreamFrom2DCode(Mat code)
 	int threshold = 10;
 	std::vector<color> moduleColorSums(getModulesNumber());
 	std::vector<int> moduleColorNums(getModulesNumber());
+	std::vector<map<int, int>> moduleColorModas(getModulesNumber());
 	for (int r = 0; r < code.rows; r++)
 	{
 		for (int c = 0; c < code.cols; c++)
@@ -95,7 +103,48 @@ string DecodingUtil::getBitStreamFrom2DCode(Mat code)
 				moduleColorSums[index].r += currentR;
 				moduleColorNums[index]++;
 			}
+
+			map<int, int> currentModuleModasMap = moduleColorModas[index];
+			bool suchColorWasBefore = false;
+			for (map<int, int>::iterator it = currentModuleModasMap.begin(); it != currentModuleModasMap.end(); ++it) {
+				int x = it->first / codeSideSize;
+				int y = it->first % codeSideSize;
+				if (currentB == code.at<cv::Vec3b>(x, y)[0] || currentG == code.at<cv::Vec3b>(x, y)[1] || currentR == code.at<cv::Vec3b>(x, y)[2])
+				{
+					it->second++;
+					suchColorWasBefore = true;
+					break;
+				}
+			}
+			if (!suchColorWasBefore)
+			{
+				currentModuleModasMap.insert(std::pair<char, int>(r * codeSideSize + c, 1));
+			}
 		}
+	}
+
+	//finding the most frequent colors (modas) in the modules
+	std::vector<color> moduleColorsBasedOnModa(getModulesNumber());
+	for (int i = 0; i < moduleColorModas.size(); i++)
+	{
+		map<int, int> currentMap = moduleColorModas[i];
+		int max = 0;
+		int index = 0;
+		for (map<int, int>::iterator it = currentMap.begin(); it != currentMap.end(); ++it)
+		{
+			if (it->second > max)
+			{
+				max = it->second;
+				index = it->first;
+			}
+		}
+		int x = index / codeSideSize;
+		int y = index % codeSideSize;
+		color modaColor;
+		modaColor.b = code.at<cv::Vec3b>(x, y)[0];
+		modaColor.g = code.at<cv::Vec3b>(x, y)[1];
+		modaColor.r = code.at<cv::Vec3b>(x, y)[2];
+		moduleColorsBasedOnModa.push_back(modaColor);
 	}
 
 	std::vector<color> moduleColorAverages(getModulesNumber());
@@ -120,14 +169,16 @@ string DecodingUtil::getBitStreamFrom2DCode(Mat code)
 		}
 		else if (i <= lastPaletteModuleIndex)
 		{
-			paletteInCode.push_back(moduleColorAverages[i]);
+			//paletteInCode.push_back(moduleColorAverages[i]);
+			paletteInCode.push_back(moduleColorsBasedOnModa[i]);
 			paletteColorAmountInCode.push_back(1); //bc for now it is only palette color itself (of this color)
 			//std::cout << "palette color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
 			//	", r - " << moduleColorAverages[i].r << endl;
 		}
 		else
 		{
-			color currentColor = moduleColorAverages[i];
+			//color currentColor = moduleColorAverages[i];
+			color currentColor = moduleColorsBasedOnModa[i];
 			//std::cout << "current color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
 			//	", r - " << moduleColorAverages[i].r << endl;
 			int paletteIndex = getPaletteIndex(paletteInCode, currentColor);
@@ -144,10 +195,16 @@ string DecodingUtil::getBitStreamFrom2DCode(Mat code)
 	return bitStream;
 }
 
-Mat DecodingUtil::perspectiveTransform(Mat input, Point2f* inputQuad, Point2f* outputQuad)
+//perspective transformation and resizing to the square
+Mat DecodingUtil::perspectiveTransform(Mat input, Point2f* inputQuad)
 {
 	Mat lambda(2, 4, CV_32FC1);
-	Mat output;
+	Mat output = Mat::zeros(codeSideSize, codeSideSize, input.type());
+	Point2f outputQuad[4];
+	outputQuad[0] = Point2f(0, 0);
+	outputQuad[1] = Point2f(output.cols - 1, 0);
+	outputQuad[2] = Point2f(output.cols - 1, output.rows - 1);
+	outputQuad[3] = Point2f(0, output.rows - 1);
 	lambda = Mat::zeros(input.rows, input.cols, input.type());
 	lambda = getPerspectiveTransform(inputQuad, outputQuad);
 	warpPerspective(input, output, lambda, output.size());

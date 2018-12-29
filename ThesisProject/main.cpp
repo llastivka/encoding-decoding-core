@@ -7,10 +7,32 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
-	Mat image = imread("lena_saturation.png", IMREAD_COLOR);
+	/*Mat image = imread("side_pic1.jpg", IMREAD_COLOR);
+	Point2f inputQuad[4];
+	inputQuad[0] = Point2f(678, 655);
+	inputQuad[1] = Point2f(1135, 733);
+	inputQuad[2] = Point2f(1043, 1218);
+	inputQuad[3] = Point2f(602, 1226);*/
 
+	/*Mat image = imread("side_pic2.jpg", IMREAD_COLOR);
+	Point2f inputQuad[4];
+	inputQuad[0] = Point2f(360, 530);
+	inputQuad[1] = Point2f(1300, 600);
+	inputQuad[2] = Point2f(1214, 1456);
+	inputQuad[3] = Point2f(368, 1578);*/
+
+	/*Mat image = imread("side_pic3.jpg", IMREAD_COLOR);
+	Point2f inputQuad[4];
+	inputQuad[0] = Point2f(171, 653);
+	inputQuad[1] = Point2f(1215, 654);
+	inputQuad[2] = Point2f(1081, 1292);
+	inputQuad[3] = Point2f(358, 1298);*/
+
+	Mat image = imread("transformed.png", IMREAD_COLOR);
+	
 	ErrorCorrector errorCorrector = ErrorCorrector();
 	int modulesNumber = 100;
+
 	/*string message = "IRENA";
 	cout << message << endl;
 	int modulesNumber = 100;
@@ -25,6 +47,10 @@ int main(int argc, char const *argv[])
 
 	DecodingUtil decoder = DecodingUtil(modulesNumber);
 	decoder.setErrorCorrector(errorCorrector);
+
+	//Mat transformed = decoder.perspectiveTransform(image, inputQuad);
+	//imshow("transformed", transformed);
+	//imwrite("transformed.png", transformed);
 	string bitStream = decoder.getBitStreamFrom2DCode(image);
 	cout << bitStream << endl;
 	string decoded = decoder.decode(bitStream);
@@ -50,7 +76,7 @@ int main(int argc, char const *argv[])
 	imshow("output", output);
 	imwrite("out.png", output);
 	*/
-	waitKey(0);
+	waitKey(1);
 	
 	return 0;
 }

@@ -57,5 +57,5 @@ class DecodingUtil : public Coder {
 		bool checkErrorCorrection(string message, vector<int> codeword);
 		int getPaletteIndex(std::vector<Coder::color> palette, Coder::color currentColor);
 		std::string getBitStreamFrom2DCode(Mat code);
-		Mat perspectiveTransform(Mat input, Point2f* inputQuad, Point2f* outputQuad);
+		Mat perspectiveTransform(Mat input, Point2f* inputQuad);
 };

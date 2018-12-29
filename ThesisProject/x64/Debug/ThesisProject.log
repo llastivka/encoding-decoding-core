@@ -1,3 +1,6 @@
 ﻿  decoding_util.cpp
-c:\users\kdram\source\repos\thesisproject\thesisproject\decoding_util.cpp(70): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-  ThesisProject.vcxproj -> C:\Users\kdram\source\repos\ThesisProject\x64\Debug\ThesisProject.exe
+d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(77): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(205): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(206): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(207): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  ThesisProject.vcxproj -> D:\School\PRO\ThesisProject\x64\Debug\ThesisProject.exe
