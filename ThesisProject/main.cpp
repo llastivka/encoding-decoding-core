@@ -28,7 +28,7 @@ int main(int argc, char const *argv[])
 	inputQuad[2] = Point2f(1081, 1292);
 	inputQuad[3] = Point2f(358, 1298);*/
 
-	Mat image = imread("transformed.png", IMREAD_COLOR);
+	Mat image = imread("lena_saturation.png", IMREAD_COLOR);
 	
 	ErrorCorrector errorCorrector = ErrorCorrector();
 	int modulesNumber = 100;
