@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <stdint.h>
 #include <math.h>
+#include <fstream>
 #include <string>
 #include <bitset>
 #include "error_corrector.hpp"

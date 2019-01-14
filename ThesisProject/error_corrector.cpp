@@ -67,7 +67,7 @@ std::vector<int> ErrorCorrector::encode(string text)
 	// Transform message into Reed-Solomon encoded codeword
 	if (!encoder.encode(text, block))
 	{
-		std::cout << "Error - Critical encoding failure!" << std::endl;
+		std::cout << "Error - Critical encoding failure! (error correction encoding)" << std::endl;
 		return {};
 	}
 		
@@ -119,12 +119,12 @@ bool ErrorCorrector::decode(string message, std::vector<int> codeword)
 
 	if (!decoder.decode(block))
 	{
-		std::cout << "Error - Critical decoding failure!" << std::endl;
+		std::cout << "Error - Critical decoding failure! (error correction decoding)" << std::endl;
 		return "";
 	}
 	else if (!schifra::is_block_equivelent(block, message))
 	{
-		std::cout << "Error - Error correction failed!" << std::endl;
+		std::cout << "Error - Error correction failed! (check if error correction  block equivalent)" << std::endl;
 		return false;
 	}
 
