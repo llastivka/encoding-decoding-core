@@ -55,7 +55,9 @@ class DecodingUtil : public Coder {
 		DecodingUtil(int modulesNumber);
 		string decode(string bitStream);
 		bool checkErrorCorrection(string message, vector<int> codeword);
-		int getPaletteIndex(std::vector<Coder::color> palette, std::vector<vector<double>> paletteBgrProportions, Coder::color currentColor);
+		int getPaletteIndex(std::vector<Vec3b> palette, Vec3b currentPixelHSV);
 		std::string getBitStreamFrom2DCode(Mat code);
+		Mat threasholdImage(Mat img);
+		Point2f* getAnglesFromImage(Mat image, Mat imageGray);
 		Mat perspectiveTransform(Mat input, Point2f* inputQuad);
 };
