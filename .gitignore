@@ -393,3 +393,15 @@ TestResult.xml
 Version.cs
 Version.h
 Version.cpp
+
+
+
+
+
+.vs/
+ThesisProject/ThesisProject.vcxproj
+ThesisProject/ThesisProject.vcxproj.filters
+ThesisProject/x64/Debug/
+x64/Debug/
+
+
