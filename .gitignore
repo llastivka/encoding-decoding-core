@@ -393,3 +393,13 @@ TestResult.xml
 Version.cs
 Version.h
 Version.cpp
+
+
+
+
+
+.vs/
+ThesisProject/x64/Debug/
+x64/Debug/
+
+

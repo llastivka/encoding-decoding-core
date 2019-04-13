@@ -1,2 +1,17 @@
-﻿  main.cpp
-  ThesisProject.vcxproj -> D:\School\PRO\ThesisProject\x64\Debug\ThesisProject.exe
+﻿  coder.cpp
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(21): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(28): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(57): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(149): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(293): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(294): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(295): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(312): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(342): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(363): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(405): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(406): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+d:\school\pro\spring 2019 is the new beginning\encoding-decoding-core\thesisproject\coder.cpp(407): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+  main.cpp
+  Generating Code...
+  ThesisProject.vcxproj -> D:\School\PRO\Spring 2019 is the new beginning\encoding-decoding-core\x64\Debug\ThesisProject.exe

@@ -20,14 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="coder.hpp" />
-    <ClInclude Include="decoding_util.hpp" />
-    <ClInclude Include="encoding_util.hpp" />
     <ClInclude Include="error_corrector.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="coder.cpp" />
-    <ClCompile Include="decoding_util.cpp" />
-    <ClCompile Include="encoding_util.cpp" />
     <ClCompile Include="error_corrector.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
