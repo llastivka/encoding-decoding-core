@@ -1,5 +1,4 @@
-#include "decoding_util.hpp"
-#include "encoding_util.hpp"
+#include "coder.hpp"
 #include <iostream>
 #include <stdint.h>
 
@@ -28,7 +27,7 @@ int main(int argc, char const *argv[])
 	inputQuad[2] = Point2f(1081, 1292);
 	inputQuad[3] = Point2f(358, 1298);*/
 
-	Mat image = imread("transformed1.png", IMREAD_COLOR);
+	Mat image = imread("lena_blik.png", IMREAD_COLOR);
 	
 	ErrorCorrector errorCorrector = ErrorCorrector();
 	int modulesNumber = 100;
@@ -45,7 +44,7 @@ int main(int argc, char const *argv[])
 	imshow("encoded", code);
 	imwrite("encoded.png", code);*/
 
-	DecodingUtil decoder = DecodingUtil(modulesNumber);
+	Coder decoder = Coder(modulesNumber);
 	decoder.setErrorCorrector(errorCorrector);
 
 	//Mat transformed = decoder.perspectiveTransform(image, inputQuad);
