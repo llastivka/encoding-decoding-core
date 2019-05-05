@@ -345,7 +345,7 @@ Mat Coder::perspectiveTransform(Mat input, Point2f* inputQuad)
 
 	inputQuad = getAnglesFromImage(input, grayMat);
 
- 	Mat lambda(2, 4, CV_32FC1);
+  	Mat lambda(2, 4, CV_32FC1);
 	Mat output = Mat::zeros(codeSideSize, codeSideSize, input.type());
 	Point2f outputQuad[4];
 	outputQuad[0] = Point2f(0, 0);
