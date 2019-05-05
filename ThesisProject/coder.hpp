@@ -129,9 +129,9 @@ private:
 	static color palette[COLOR_NUMBER];
 	static const color WHITE;
 
-	int codeSideSize = 1000; //amount of pixels in code side
+	int codeSideSize; //amount of pixels in code side
 	int codeSide; //amount of modules in code side
-	int moduleSideSize; //amount of pixels in module side
+	int moduleSideSize = 100; //amount of pixels in module side
 	
 public:
 	Coder();
@@ -147,11 +147,16 @@ public:
 	string decode(string bitStream);
 	bool checkErrorCorrection(string message, vector<int> codeword);
 	int getPaletteIndex(std::vector<Coder::color> palette, std::vector<vector<double>> paletteBgrProportions, Coder::color currentColor);
+	int getPaletteIndex(std::vector<Vec3b> palette, Vec3b currentPixelHSV);
 	std::string getBitStreamFrom2DCode(Mat code);
 	Mat perspectiveTransform(Mat input, Point2f* inputQuad);
+	Mat threasholdImage(Mat img);
+	Point2f* getAnglesFromImage(Mat image, Mat imageGray);
+	Mat createMat(int8_t* image, int32_t rows, int32_t cols);
+	std::string decodeMessageFromImage(int8_t* image, int32_t rows, int32_t cols, vector<int32_t> xInputQuad, vector<int32_t> yInputQuad);
 
 	//encoding specific methods
 	string encode(string text);
 	string encodeErrorCorrectionCodeword(vector<int> codeword);
-	Mat create2DCode(string bitString, int moduleSideSize);
+	Mat create2DCode(string bitString);
 };
