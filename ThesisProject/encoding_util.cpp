@@ -14,16 +14,16 @@ string EncodingUtil::encode(string text)
 	{
 		if (i != text.size() - 1)
 		{
-			int pairFirst = alphanumericValuesMap.find(text[i])->second;
+			int pairFirst = alphanumericValuesMapEncoding.find(text[i])->second;
 			cout << "pairFirst: " << pairFirst << endl;
-			int pairSecond = alphanumericValuesMap.find(text[++i])->second;
+			int pairSecond = alphanumericValuesMapEncoding.find(text[++i])->second;
 			cout << "pairSecond: " << pairSecond << endl;
 			encoded.append(getBinaryAsString(45 * pairFirst + pairSecond));
 			cout << "encoded together: " << getBinaryAsString(45 * pairFirst + pairSecond) << endl;
 		}
 		else
 		{
-			int last = alphanumericValuesMap.find(text[i])->second;
+			int last = alphanumericValuesMapEncoding.find(text[i])->second;
 			string binary = getBinaryAsString(last);
 			cout << "last: " << last << " - " << getBinaryAsString(last) << endl;
 			encoded.append(binary.substr(BIT_NUM - SHORT_BIT_NUM, SHORT_BIT_NUM));

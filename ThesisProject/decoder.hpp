@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace decoder {
 
@@ -17,20 +17,9 @@ public:
     /** create() is to create an instance of the decoder */
     static std::shared_ptr<Decoder> create();
 
-    /** getters-setters */
-    virtual int8_t* getImage() = 0;
+    virtual std::string decode(int8_t* image) = 0;
 
-    virtual void setImage(int8_t* image, int32_t rows, int32_t cols, int32_t type) = 0;
-
-    virtual void setXInputQuad(int32_t xQuad) = 0;
-
-    virtual void setYInputQuad(int32_t yQuad) = 0;
-
-    virtual void seXOutputQuad(int32_t xQuad) = 0;
-
-    virtual void setYOutputQuad(int32_t yQuad) = 0;
-
-    virtual int8_t* perspectiveTransform() = 0;
+    virtual std::string decodeWithAngles(int8_t* image, const std::vector<int32_t> & xInputQuad, const std::vector<int32_t> & yInputQuad) = 0;
 };
 
 }  // namespace decoder

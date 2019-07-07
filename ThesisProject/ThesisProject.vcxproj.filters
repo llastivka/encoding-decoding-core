@@ -30,6 +30,9 @@
     <ClCompile Include="coder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="decoder_media.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="decoding_util.hpp">
@@ -42,6 +45,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="coder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="decoder_media.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\CrossPlatformDecoder\src\cpp\decoder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

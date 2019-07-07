@@ -19,13 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\CrossPlatformDecoder\src\cpp\decoder.hpp" />
     <ClInclude Include="coder.hpp" />
+    <ClInclude Include="decoder_media.hpp" />
     <ClInclude Include="decoding_util.hpp" />
     <ClInclude Include="encoding_util.hpp" />
     <ClInclude Include="error_corrector.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="coder.cpp" />
+    <ClCompile Include="decoder_media.cpp" />
     <ClCompile Include="decoding_util.cpp" />
     <ClCompile Include="encoding_util.cpp" />
     <ClCompile Include="error_corrector.cpp" />

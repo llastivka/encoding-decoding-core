@@ -25,8 +25,8 @@ string DecodingUtil::decode(string bitStream)
 			int first = pair / 45;
 			int second = pair % 45;
 			//add here some check later so that it didn't throw error if first or second
-			decoded += alphanumericValuesMap.find(first)->second;
-			decoded += alphanumericValuesMap.find(second)->second;
+			decoded += alphanumericValuesMapDecoding.find(first)->second;
+			decoded += alphanumericValuesMapDecoding.find(second)->second;
 			currentPosition += BIT_NUM;
 		}
 		else
@@ -34,7 +34,7 @@ string DecodingUtil::decode(string bitStream)
 			int last = getDecimalFromBinaryString(bitStream.substr(currentPosition, SHORT_BIT_NUM));
 			if (last > 0 && last < 45)
 			{
-				decoded += alphanumericValuesMap.find(last)->second;
+				decoded += alphanumericValuesMapDecoding.find(last)->second;
 			}
 			else
 			{
@@ -254,9 +254,9 @@ Mat DecodingUtil::threasholdImage(Mat img)
 	return img;
 }
 
-Point2f* DecodingUtil::getAnglesFromImage(Mat image, Mat imageGray)
+Point2i* DecodingUtil::getAnglesFromImage(Mat image, Mat imageGray)
 {
-	Point2f inputQuad[4];
+	Point2i inputQuad[4];
 	vector<Vec2i> angles = {};
 
 	vector<vector<Point>> contours; // Vector for storing contour
@@ -285,10 +285,10 @@ Point2f* DecodingUtil::getAnglesFromImage(Mat image, Mat imageGray)
 
 	//x and y for each of 5 points (upper-left, upper-right, lower-right, lower-left, centroid) for each of 4 largest conrours
 	vector<vector<Vec2i>> countoursImportantPointsCoordinates = {}; //final size should be 4
-	Point2f generalUpperLeft = Point2f(image.cols, image.rows);
-	Point2f generalUpperRight = Point2f(0, image.rows);
-	Point2f generalLowerRight = Point2f(0, 0);
-	Point2f generalLowerLeft = Point2f(image.cols, 0);
+	Point2i generalUpperLeft = Point2i(image.cols, image.rows);
+	Point2i generalUpperRight = Point2i(0, image.rows);
+	Point2i generalLowerRight = Point2i(0, 0);
+	Point2i generalLowerLeft = Point2i(image.cols, 0);
 	for (int i = 0; i < largestContourIndexes.size(); i++)
 	{
 		int maxX = 0;
@@ -355,7 +355,7 @@ Point2f* DecodingUtil::getAnglesFromImage(Mat image, Mat imageGray)
 		*/
 		for (int i = 0; i < 4; i++)
 		{
-			circle(image, inputQuad[i], 3, Scalar(0, 0, 255), 1, 8, 0);
+			circle(image, inputQuad[i], 10, Scalar(0, 0, 255), 1, 8, 0);
 		}
 		imshow("points", image);
 		cout << "Press any key" << endl;
@@ -363,24 +363,24 @@ Point2f* DecodingUtil::getAnglesFromImage(Mat image, Mat imageGray)
 	}
 
 	//for now i'll just assign it but i'll have to rewrite it eventually
-	inputQuad[0] = Point2f(generalUpperLeft.x, generalUpperLeft.y);
-	inputQuad[1] = Point2f(generalUpperRight.x, generalUpperRight.y);
-	inputQuad[2] = Point2f(generalLowerRight.x, generalLowerRight.y);
-	inputQuad[3] = Point2f(generalUpperLeft.x, generalLowerLeft.y);
+	inputQuad[0] = Point2i(generalUpperLeft.x, generalUpperLeft.y);
+	inputQuad[1] = Point2i(generalUpperRight.x, generalUpperRight.y);
+	inputQuad[2] = Point2i(generalLowerRight.x, generalLowerRight.y);
+	inputQuad[3] = Point2i(generalUpperLeft.x, generalLowerLeft.y);
 
 	return inputQuad;
+}
+
+Mat DecodingUtil::createMat(int8_t* image) {
+	int rows = 100;
+	int cols = 100;
+	cv::Mat mat(rows, cols, CV_8UC3, image);
+	return mat;
 }
 
 //perspective transformation and resizing to the square
 Mat DecodingUtil::perspectiveTransform(Mat input, Point2f* inputQuad)
 {
-	//gray scaling and thresholding for further angles search
-	cv::Mat grayMat;
-	cv::cvtColor(input, grayMat, COLOR_BGR2GRAY);
-	grayMat = threasholdImage(grayMat);
-
-	inputQuad = getAnglesFromImage(input, grayMat);
-
 	Mat lambda(2, 4, CV_32FC1);
 	Mat output = Mat::zeros(codeSideSize, codeSideSize, input.type());
 	Point2f outputQuad[4];
@@ -392,4 +392,33 @@ Mat DecodingUtil::perspectiveTransform(Mat input, Point2f* inputQuad)
 	lambda = getPerspectiveTransform(inputQuad, outputQuad);
 	warpPerspective(input, output, lambda, output.size());
 	return output;
+}
+
+std::string DecodingUtil::decodeMessageFromImage(int8_t* image) {
+	//gray scaling and thresholding for further angles search
+	cv::Mat imageMat = createMat(image);
+	cv::Mat grayMat;
+	cv::cvtColor(imageMat, grayMat, COLOR_BGR2GRAY);
+	grayMat = threasholdImage(grayMat);
+
+	Point2i* inputQuad = getAnglesFromImage(imageMat, grayMat);
+
+	vector<int32_t> xInputQuad = { inputQuad[0].x, inputQuad[1].x, inputQuad[2].x, inputQuad[3].x };
+	vector<int32_t> yInputQuad = { inputQuad[0].y, inputQuad[1].y, inputQuad[2].y, inputQuad[3].y };
+
+	return decodeMessageFromImage(image, xInputQuad, yInputQuad);
+}
+
+std::string DecodingUtil::decodeMessageFromImage(int8_t* image, vector<int32_t> xInputQuad, vector<int32_t> yInputQuad) {
+	Point2f inputQuad[4];
+	inputQuad[0] = Point2f(xInputQuad[0], xInputQuad[0]);
+	inputQuad[1] = Point2f(xInputQuad[1], xInputQuad[1]);
+	inputQuad[2] = Point2f(xInputQuad[2], xInputQuad[2]);
+	inputQuad[3] = Point2f(xInputQuad[3], xInputQuad[3]);
+
+	cv::Mat imageMat = createMat(image);
+	cv::Mat transformed = perspectiveTransform(imageMat, inputQuad);
+	std::string bitStream = getBitStreamFrom2DCode(transformed);
+	std::string decoded = decode(bitStream);
+	return decoded;
 }

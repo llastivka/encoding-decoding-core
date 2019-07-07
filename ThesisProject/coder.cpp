@@ -1,5 +1,7 @@
 #include "coder.hpp"
 
+ErrorCorrector Coder::errorCorrector = ErrorCorrector();
+
 Coder::color Coder::palette[COLOR_NUMBER] = {
 	{ 255, 0, 0 }, //red
 	{ 0, 255, 0 }, //green

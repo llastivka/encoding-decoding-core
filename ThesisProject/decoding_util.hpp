@@ -2,7 +2,7 @@
 
 class DecodingUtil : public Coder {
 	private:
-		map<int, char> alphanumericValuesMap
+		map<int, char> alphanumericValuesMapDecoding
 		{
 			std::make_pair(1, '0'),
 			std::make_pair(2, '1'),
@@ -58,6 +58,9 @@ class DecodingUtil : public Coder {
 		int getPaletteIndex(std::vector<Vec3b> palette, Vec3b currentPixelHSV);
 		std::string getBitStreamFrom2DCode(Mat code);
 		Mat threasholdImage(Mat img);
-		Point2f* getAnglesFromImage(Mat image, Mat imageGray);
+		Point2i* getAnglesFromImage(Mat image, Mat imageGray);
 		Mat perspectiveTransform(Mat input, Point2f* inputQuad);
+		Mat createMat(int8_t* image);
+		std::string decodeMessageFromImage(int8_t* image);
+		std::string decodeMessageFromImage(int8_t* image, vector<int32_t> xInputQuad, vector<int32_t> yInputQuad);
 };

@@ -1,20 +1,20 @@
-﻿  decoding_util.cpp
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(276): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(288): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(289): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(291): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(330): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(331): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(335): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(336): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(340): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(341): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(345): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(346): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(388): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(389): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(390): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  main.cpp
-  Generating Code...
-d:\school\pro\thesisproject\thesisproject\decoding_util.cpp(371): warning C4172: returning address of local variable or temporary: inputQuad
-  ThesisProject.vcxproj -> D:\School\PRO\ThesisProject\x64\Debug\ThesisProject.exe
+﻿  decoder_media.cpp
+c:\program files (x86)\microsoft visual studio\2017\enterprise\vc\tools\msvc\14.14.26428\include\memory(1770): error C2259: 'decoder::DecoderMedia': cannot instantiate abstract class
+  c:\program files (x86)\microsoft visual studio\2017\enterprise\vc\tools\msvc\14.14.26428\include\memory(1770): note: due to following members:
+  c:\program files (x86)\microsoft visual studio\2017\enterprise\vc\tools\msvc\14.14.26428\include\memory(1770): note: 'std::string decoder::Decoder::decodeWithAngles(int8_t *,const std::vector<int32_t,std::allocator<_Ty>> &,const std::vector<_Ty,std::allocator<_Ty>> &)': is abstract
+          with
+          [
+              _Ty=int32_t
+          ]
+  d:\school\pro\thesisproject\thesisproject\decoder.hpp(22): note: see declaration of 'decoder::Decoder::decodeWithAngles'
+  c:\program files (x86)\microsoft visual studio\2017\enterprise\vc\tools\msvc\14.14.26428\include\memory(1836): note: see reference to function template instantiation 'std::_Ref_count_obj<_Ty>::_Ref_count_obj<>(void)' being compiled
+          with
+          [
+              _Ty=decoder::DecoderMedia
+          ]
+  c:\program files (x86)\microsoft visual studio\2017\enterprise\vc\tools\msvc\14.14.26428\include\memory(1837): note: see reference to function template instantiation 'std::_Ref_count_obj<_Ty>::_Ref_count_obj<>(void)' being compiled
+          with
+          [
+              _Ty=decoder::DecoderMedia
+          ]
+  d:\school\pro\thesisproject\thesisproject\decoder_media.cpp(5): note: see reference to function template instantiation 'std::shared_ptr<decoder::DecoderMedia> std::make_shared<decoder::DecoderMedia,>(void)' being compiled

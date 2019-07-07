@@ -28,7 +28,7 @@ int main(int argc, char const *argv[])
 	inputQuad[2] = Point2f(1081, 1292);
 	inputQuad[3] = Point2f(358, 1298);
 
-	Mat image = imread("lena_grid_15.png", IMREAD_COLOR);
+	Mat image = imread("lena_distorted.png", IMREAD_COLOR);
 	
 	ErrorCorrector errorCorrector = ErrorCorrector();
 	int modulesNumber = 100;
@@ -77,7 +77,7 @@ int main(int argc, char const *argv[])
 	imwrite("out.png", output);
 	*/
 	imshow("transformed", transformed);
- 	waitKey();
+ 	waitKey(0);
 	
 	return 0;
 }

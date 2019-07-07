@@ -18,7 +18,7 @@ private:
 	static ErrorCorrector errorCorrector;
 
 public:
-	map<char, int> alphanumericValuesMap
+	map<char, int> alphanumericValuesMapEncoding
 	{
 		std::make_pair('0', 1),
 		std::make_pair('1', 2),
