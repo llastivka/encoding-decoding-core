@@ -15,20 +15,14 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="error_corrector.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="coder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="error_corrector.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="coder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

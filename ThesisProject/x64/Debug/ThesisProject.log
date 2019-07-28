@@ -1,35 +1,29 @@
 ﻿  coder.cpp
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(21): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(28): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(57): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(154): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(352): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(353): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(354): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(402): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(421): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(422): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(424): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(464): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(465): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(469): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(470): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(474): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(475): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(479): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(480): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(516): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(517): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(518): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(519): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(549): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(579): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(600): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(642): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(643): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(644): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
-  error_corrector.cpp
-  main.cpp
-  Generating Code...
-d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(506): warning C4172: returning address of local variable or temporary: inputQuad
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(31): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(38): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(67): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(179): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(377): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(378): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(379): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(493): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(512): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(513): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(515): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(555): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(556): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(560): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(561): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(565): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(566): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(570): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(571): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(678): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(696): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(730): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(687): warning C4102: 'std': unreferenced label
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(752): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(794): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(795): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+d:\school\pro\spring_2019_is_the_new_beginning\encoding-decoding-core1\thesisproject\coder.cpp(796): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
   ThesisProject.vcxproj -> D:\School\PRO\Spring_2019_is_the_new_beginning\encoding-decoding-core1\x64\Debug\ThesisProject.exe
