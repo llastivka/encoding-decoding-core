@@ -20,11 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="coder.hpp" />
-    <ClInclude Include="error_corrector.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="coder.cpp" />
-    <ClCompile Include="error_corrector.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
