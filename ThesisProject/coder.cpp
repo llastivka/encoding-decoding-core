@@ -272,7 +272,7 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 		//string b = to_string(moduleColorAverages[i].b);
 		//string g = to_string(moduleColorAverages[i].g);
 		//string r = to_string(moduleColorAverages[i].r);
-		//cout << "(" + b + ", " + g + ", " + r + ")" << endl;
+		//std::cout << "(" + b + ", " + g + ", " + r + ")" << endl;
 
 		//hsv version
 		if (moduleHSVNums[i] > 0)
@@ -292,7 +292,7 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 			{
 			int index = r / moduleSideSize * codeSide + c / moduleSideSize;
 			color pixelColor = moduleColorAverages[index];
-			//cout << index << ": " << pixelColor.b << ", " << pixelColor.g << ", " << pixelColor.r << endl;
+			//std::cout << index << ": " << pixelColor.b << ", " << pixelColor.g << ", " << pixelColor.r << endl;
 			image.at<cv::Vec3b>(r, c)[0] = pixelColor.b;
 			image.at<cv::Vec3b>(r, c)[1] = pixelColor.g;
 			image.at<cv::Vec3b>(r, c)[2] = pixelColor.r;
@@ -320,18 +320,18 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 			paletteColorAmountInCode.push_back(1); //bc for now it is only palette color itself (of this color)
 			paletteHSV.push_back(moduleHSVAverages[i]);
 
-			//std::cout << "palette color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
+			//std::std::cout << "palette color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
 			//	", r - " << moduleColorAverages[i].r << endl;
 		}
 		else
 		{
 			color currentColor = moduleColorAverages[i];
 			cv::Vec3b currentPixelHSV = moduleHSVAverages[i];
-			//std::cout << "current color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
+			//std::std::cout << "current color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
 			//	", r - " << moduleColorAverages[i].r << endl;
 			int paletteIndex = getPaletteIndex(paletteHSV, currentPixelHSV);
-			//cout << paletteIndex + 1 << endl;
-			//std::cout << "decided module color: " << paletteIndex << endl;
+			//std::cout << paletteIndex + 1 << endl;
+			//std::std::cout << "decided module color: " << paletteIndex << endl;
 			colorIndexSequence.push_back(paletteIndex);
 			bitStream.append(getBinaryAsString(paletteIndex).substr(BIT_NUM - BITS_IN_MODULE, BITS_IN_MODULE));
 
@@ -349,7 +349,7 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 }
 
 //perspective transformation and resizing to the square
-cv::Mat Coder::perspectiveTransform(cv::Mat input, vector<cv::Point2f> inputQuad)
+cv::Mat Coder::perspectiveTransform(cv::Mat input, vector<cv::Point2i> inputQuad)
 {
 	/*
 	//increase saturation
@@ -373,10 +373,10 @@ cv::Mat Coder::perspectiveTransform(cv::Mat input, vector<cv::Point2f> inputQuad
 	cv::Mat output = cv::Mat::zeros(codeSideSize, codeSideSize, input.type());
 	cv::Point2f outputQuad[4];
     cv::Point2f inputQuad1[4];
-	outputQuad[0] = cv::Point2f(0, 0);
-	outputQuad[1] = cv::Point2f(output.cols - 1, 0);
-	outputQuad[2] = cv::Point2f(output.cols - 1, output.rows - 1);
-	outputQuad[3] = cv::Point2f(0, output.rows - 1);
+	outputQuad[0] = cv::Point2f((float) 0, (float) 0);
+	outputQuad[1] = cv::Point2f((float) (output.cols - 1), (float) 0);
+	outputQuad[2] = cv::Point2f((float) (output.cols - 1), (float) (output.rows - 1));
+	outputQuad[3] = cv::Point2f((float) 0, (float) (output.rows - 1));
 
     inputQuad1[0] = inputQuad.at(0);
     inputQuad1[1] = inputQuad.at(1);
@@ -434,19 +434,7 @@ cv::Mat makeWhiteWhiter(cv::Mat image) {
 
 cv::Mat Coder::perspectiveTransform(cv::Mat input)
 {
-	//input = makeWhiteWhiter(input);
-	//cv::imwrite("anglesFromImage_Before.png", input);
-	input = makeWhiteWhiter(input);
-	
-	//gray scaling and thresholding for further angles search
-	cv::Mat grayMat;
-	cv::cvtColor(input, grayMat, cv::COLOR_BGR2GRAY);
-	grayMat = threasholdImage(grayMat);
-
-	//cv::imwrite("anglesFromImage_AfterColor.png", input);
-	//cv::imwrite("anglesFromImage_AfterGray.png", grayMat);
-
-    vector<cv::Point2f> inputQuad = getAnglesFromImage(input, grayMat);
+	vector<cv::Point2i> inputQuad = getAnglesFromImage(input);
 	//cv::imwrite("circled.png", input);
 	return perspectiveTransform(input, inputQuad);
 }
@@ -470,15 +458,25 @@ cv::Mat Coder::threasholdImage(cv::Mat img)
 	return img;
 }
 
-vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
+vector<cv::Point2i> Coder::getAnglesFromImage(cv::Mat image)
 {
+	//cv::imwrite("anglesFromImage_Before.png", input);
+	image = makeWhiteWhiter(image);
 
-    vector<cv::Point2f> inputQuad;
+	//gray scaling and thresholding for further angles search
+	cv::Mat grayMat;
+	cv::cvtColor(image, grayMat, cv::COLOR_BGR2GRAY);
+	grayMat = threasholdImage(grayMat);
+
+	//cv::imwrite("anglesFromImage_AfterColor.png", input);
+	//cv::imwrite("anglesFromImage_AfterGray.png", grayMat);
+
+    vector<cv::Point2i> inputQuad;
 	vector<cv::Vec2i> angles = {};
 
 	vector<vector<cv::Point>> contours; // Vector for storing contour
 	vector<cv::Vec4i> hierarchy;
-	findContours(imageGray, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
+	findContours(grayMat, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
 
 	vector<double> largestArea = { 0, 0, 0, 0 };
 	vector<int> largestContourIndexes = { 0, 0, 0, 0 };
@@ -509,10 +507,10 @@ vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
 	cv::Vec2i originLowerLeft = cv::Vec2i(0, image.rows - 1);
 
 	//here are the opposite values in order to at least one of the real values could be set
-	cv::Point2f generalUpperLeft = cv::Point2f(image.cols - 1, image.rows - 1);
-	cv::Point2f generalUpperRight = cv::Point2f(0, image.rows - 1);
-	cv::Point2f generalLowerRight = cv::Point2f(0, 0);
-	cv::Point2f generalLowerLeft = cv::Point2f(image.cols - 1, 0);
+	cv::Point2i generalUpperLeft = cv::Point2i(image.cols - 1, image.rows - 1);
+	cv::Point2i generalUpperRight = cv::Point2i(0, image.rows - 1);
+	cv::Point2i generalLowerRight = cv::Point2i(0, 0);
+	cv::Point2i generalLowerLeft = cv::Point2i(image.cols - 1, 0);
 	for (int i = 0; i < largestContourIndexes.size(); i++)
 	{
 		int maxX = 0;
@@ -524,7 +522,7 @@ vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
 		{
 			int x = contours[largestContourIndexes[i]][j].x;
 			int y = contours[largestContourIndexes[i]][j].y;
-			//cout << "x: " << x << "     y: " << y << endl;
+			//std::cout << "x: " << x << "     y: " << y << endl;
 			if (x > maxX)
 			{
 				maxX = x;
@@ -542,7 +540,7 @@ vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
 				minY = y;
 			}
 		}
-		//cout << i << "(" << largestContourIndexes[i] << "): minX = " << minX << ", maxX = " << maxX << ", minY = " << minY << ", maxY = " << maxY << endl;
+		//std::cout << i << "(" << largestContourIndexes[i] << "): minX = " << minX << ", maxX = " << maxX << ", minY = " << minY << ", maxY = " << maxY << endl;
 		cv::Vec2i upperLeft = cv::Vec2i(minX, minY);
 		cv::Vec2i upperRight = cv::Vec2i(maxX, minY);
 		cv::Vec2i lowerRight = cv::Vec2i(maxX, maxY);
@@ -573,24 +571,24 @@ vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
 
 		//for testing purposes
 		/*
-		inputQuad[0] = Point2f(generalUpperLeft.x, generalUpperLeft.y);
-		inputQuad[1] = Point2f(generalUpperRight.x, generalUpperRight.y);
-		inputQuad[2] = Point2f(generalLowerRight.x, generalLowerRight.y);
-		inputQuad[3] = Point2f(generalUpperLeft.x, generalLowerLeft.y);
+		inputQuad[0] = Point2i(generalUpperLeft.x, generalUpperLeft.y);
+		inputQuad[1] = Point2i(generalUpperRight.x, generalUpperRight.y);
+		inputQuad[2] = Point2i(generalLowerRight.x, generalLowerRight.y);
+		inputQuad[3] = Point2i(generalUpperLeft.x, generalLowerLeft.y);
 		*/
 	}
 
 	//for now i'll just assign it but i'll have to rewrite it eventually
-	inputQuad.push_back(cv::Point2f(generalUpperLeft.x, generalUpperLeft.y));
-	inputQuad.push_back(cv::Point2f(generalUpperRight.x, generalUpperRight.y));
-	inputQuad.push_back(cv::Point2f(generalLowerRight.x, generalLowerRight.y));
-	inputQuad.push_back(cv::Point2f(generalLowerLeft.x, generalLowerLeft.y));
+	inputQuad.push_back(cv::Point2i(generalUpperLeft.x, generalUpperLeft.y));
+	inputQuad.push_back(cv::Point2i(generalUpperRight.x, generalUpperRight.y));
+	inputQuad.push_back(cv::Point2i(generalLowerRight.x, generalLowerRight.y));
+	inputQuad.push_back(cv::Point2i(generalLowerLeft.x, generalLowerLeft.y));
 
-	cv::Point2f inputQuad1[4];
-	inputQuad1[0] = cv::Point2f(generalUpperLeft.x, generalUpperLeft.y);
-	inputQuad1[1] = cv::Point2f(generalUpperRight.x, generalUpperRight.y);
-	inputQuad1[2] = cv::Point2f(generalLowerRight.x, generalLowerRight.y);
-	inputQuad1[3] = cv::Point2f(generalLowerLeft.x, generalLowerLeft.y);
+	cv::Point2i inputQuad1[4];
+	inputQuad1[0] = cv::Point2i(generalUpperLeft.x, generalUpperLeft.y);
+	inputQuad1[1] = cv::Point2i(generalUpperRight.x, generalUpperRight.y);
+	inputQuad1[2] = cv::Point2i(generalLowerRight.x, generalLowerRight.y);
+	inputQuad1[3] = cv::Point2i(generalLowerLeft.x, generalLowerLeft.y);
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -606,11 +604,11 @@ cv::Mat Coder::createMat(int8_t* image, int32_t rows, int32_t cols) {
 }
 
 std::string Coder::decodeMessageFromImage(int8_t* image, int32_t rows, int32_t cols, vector<int32_t> xInputQuad, vector<int32_t> yInputQuad) {
-//	cv::Point2f inputQuad[4];
-//	inputQuad[0] = cv::Point2f(xInputQuad[0], yInputQuad[0]);
-//	inputQuad[1] = cv::Point2f(xInputQuad[1], yInputQuad[1]);
-//	inputQuad[2] = cv::Point2f(xInputQuad[2], yInputQuad[2]);
-//	inputQuad[3] = cv::Point2f(xInputQuad[3], yInputQuad[3]);
+//	cv::Point2i inputQuad[4];
+//	inputQuad[0] = cv::Point2i(xInputQuad[0], yInputQuad[0]);
+//	inputQuad[1] = cv::Point2i(xInputQuad[1], yInputQuad[1]);
+//	inputQuad[2] = cv::Point2i(xInputQuad[2], yInputQuad[2]);
+//	inputQuad[3] = cv::Point2i(xInputQuad[3], yInputQuad[3]);
 //
 //	//int8_t* imageArr = &image[0];
 //
@@ -619,7 +617,7 @@ std::string Coder::decodeMessageFromImage(int8_t* image, int32_t rows, int32_t c
 //		imageMat = createMat(image, rows, cols);
 //	}
 //	catch (exception& e) {
-//		cout << e.what() << '\n';
+//		std::cout << e.what() << '\n';
 //		throw;
 //	}
 //
@@ -636,9 +634,45 @@ std::string Coder::decodeStringFromMat(cv::Mat mat)
 	if (transformed.empty()) {
 		return "ERROR";
 	}
-	cv::imwrite("transformed.png", transformed);
+	//cv::imwrite("transformed.png", transformed);
 	string bitStream = getBitStreamFrom2DCode(transformed);
-	cout << bitStream << endl;
+	std::cout << bitStream << endl;
+	string decoded = decode(bitStream);
+	return decoded;
+}
+
+std::vector<int> Coder::getCorners(cv::Mat mat)
+{
+	std::vector<cv::Point2i> inputQuad = getAnglesFromImage(mat);
+	std::vector<int> corners;
+	for (int i = 0; i < inputQuad.size(); i++)
+	{
+		corners.push_back(inputQuad.at(i).x);
+		corners.push_back(inputQuad.at(i).y);
+	}
+	return corners;
+}
+
+std::string Coder::decodeStringFromMatWithCorners(cv::Mat mat, vector<int> corners)
+{
+	vector<cv::Point2i> cornersQuad { cv::Point2i(0, 0), cv::Point2i(0, 0), cv::Point2i(0, 0), cv::Point2i(0, 0) };
+	cornersQuad[0].x = corners[0];
+	cornersQuad[0].y = corners[1];
+	cornersQuad[1].x = corners[2];
+	cornersQuad[1].y = corners[3];
+	cornersQuad[2].x = corners[4];
+	cornersQuad[2].y = corners[5];
+	cornersQuad[3].x = corners[6];
+	cornersQuad[3].y = corners[7];
+
+	//cv::imwrite("circled.png", input);
+	cv::Mat transformed = perspectiveTransform(mat, cornersQuad);
+	if (transformed.empty()) {
+		return "ERROR";
+	}
+	//cv::imwrite("transformed.png", transformed);
+	string bitStream = getBitStreamFrom2DCode(transformed);
+	std::cout << bitStream << endl;
 	string decoded = decode(bitStream);
 	return decoded;
 }
@@ -700,19 +734,19 @@ std::string Coder::encode(std::string text)
 		if (i != text.size() - 1)
 		{
 			int pairFirst = encodingAlphanumericValuesMap.find(text[i])->second;
-			cout << "pairFirst: " << pairFirst << endl;
+			std::cout << "pairFirst: " << pairFirst << endl;
 			int pairSecond = encodingAlphanumericValuesMap.find(text[++i])->second;
-			cout << "pairSecond: " << pairSecond << endl;
+			std::cout << "pairSecond: " << pairSecond << endl;
 			string encodedPair = getBinaryAsString(45 * pairFirst + pairSecond);
 			encoded.append(encodedPair);
 			encodedMessageOnly.append(encodedPair);
-			cout << "encoded together: " << getBinaryAsString(45 * pairFirst + pairSecond) << endl;
+			std::cout << "encoded together: " << getBinaryAsString(45 * pairFirst + pairSecond) << endl;
 		}
 		else
 		{
 			int last = encodingAlphanumericValuesMap.find(text[i])->second;
 			string binary = getBinaryAsString(last);
-			cout << "last: " << last << " - " << getBinaryAsString(last) << endl;
+			std::cout << "last: " << last << " - " << getBinaryAsString(last) << endl;
 			encoded.append(binary.substr(BIT_NUM - SHORT_BIT_NUM, SHORT_BIT_NUM));
 		}
 	}
@@ -741,7 +775,7 @@ string Coder::encodeErrorCorrectionCodeword(vector<int> codeword)
 	for (int value : codeword)
 	{
 		encodedErrorCorrection.append(getBinaryAsString(value).substr(BIT_NUM - BYTE_BIT_NUM, BYTE_BIT_NUM));
-		cout << "code correction: " << getBinaryAsString(value).substr(BIT_NUM - BYTE_BIT_NUM, BYTE_BIT_NUM) << endl;
+		std::cout << "code correction: " << getBinaryAsString(value).substr(BIT_NUM - BYTE_BIT_NUM, BYTE_BIT_NUM) << endl;
 	}
 	return encodedErrorCorrection;
 }
@@ -790,7 +824,7 @@ cv::Mat Coder::create2DCode(string bitString)
 		{
 			int index = r / moduleSideSize * codeSide + c / moduleSideSize;
 			color pixelColor = colorSequence[index];
-			//cout << index << ": " << pixelColor.b << ", " << pixelColor.g << ", " << pixelColor.r << endl;
+			//std::cout << index << ": " << pixelColor.b << ", " << pixelColor.g << ", " << pixelColor.r << endl;
 			image.at<cv::Vec3b>(r, c)[0] = pixelColor.b;
 			image.at<cv::Vec3b>(r, c)[1] = pixelColor.g;
 			image.at<cv::Vec3b>(r, c)[2] = pixelColor.r;

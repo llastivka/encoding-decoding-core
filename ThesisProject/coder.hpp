@@ -148,10 +148,10 @@ private:
 	int getPaletteIndex(std::vector<Coder::color> palette, std::vector<vector<double>> paletteBgrProportions, Coder::color currentColor);
 	int getPaletteIndex(std::vector<cv::Vec3b> palette, cv::Vec3b currentPixelHSV);
 	std::string getBitStreamFrom2DCode(cv::Mat code);
-	cv::Mat perspectiveTransform(cv::Mat input, vector<cv::Point2f> inputQuad);
+	cv::Mat perspectiveTransform(cv::Mat input, vector<cv::Point2i> inputQuad);
 	cv::Mat perspectiveTransform(cv::Mat input);
 	cv::Mat threasholdImage(cv::Mat img);
-    vector<cv::Point2f> getAnglesFromImage(cv::Mat image, cv::Mat imageGray);
+    vector<cv::Point2i> getAnglesFromImage(cv::Mat image);
 	cv::Mat createMat(int8_t* image, int32_t rows, int32_t cols);
 	std::string decodeMessageFromImage(int8_t* image, int32_t rows, int32_t cols, vector<int32_t> xInputQuad, vector<int32_t> yInputQuad);
 	bool isLink(string decoded);
@@ -171,5 +171,8 @@ public:
 
 	cv::Mat encodeStringToMat(std::string text);
     std::string decodeStringFromMat(cv::Mat mat);
+
+	vector<int> getCorners(cv::Mat mat);
+	std::string decodeStringFromMatWithCorners(cv::Mat mat, vector<int> corners);
 	
 };
