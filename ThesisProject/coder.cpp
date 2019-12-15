@@ -220,6 +220,8 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 
 	int threshold = 10;
 	int thresholdHSV = 10;
+	int lightThreshold = 20;
+	int darkThreshold = 10;
 	std::vector<color> moduleColorSums(getModulesNumber());
 	std::vector<int> moduleColorNums(getModulesNumber());
 
@@ -237,7 +239,10 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 			int currentB = code.at<cv::Vec3b>(r, c)[0];
 			int currentG = code.at<cv::Vec3b>(r, c)[1];
 			int currentR = code.at<cv::Vec3b>(r, c)[2];
-			if (abs(currentB - currentG) > threshold || abs(currentB - currentR) > threshold || abs(currentR - currentG) > threshold)
+			bool currentColorHasEnoughChrominance = abs(currentB - currentG) > threshold || abs(currentB - currentR) > threshold || abs(currentR - currentG);
+			bool currentColorIsNotTooDark = currentB > threshold || currentG > threshold || currentR > threshold;
+			bool currentColorIsNotTooLight = currentB < (255 - threshold) || currentG < (255 - threshold) || currentR < (255 - threshold);
+			if (currentColorHasEnoughChrominance && currentColorIsNotTooDark && currentColorIsNotTooLight)
 			{
 				moduleColorSums[index].b += currentB;
 				moduleColorSums[index].g += currentG;
@@ -250,7 +255,7 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 			int currentH = codeHSV.at<cv::Vec3b>(r, c)[0];
 			int currentS = codeHSV.at<cv::Vec3b>(r, c)[1];
 			int currentV = codeHSV.at<cv::Vec3b>(r, c)[2];
-			if (currentS > thresholdHSV)
+			if (currentS > thresholdHSV && currentV > thresholdHSV && currentV < 100 - thresholdHSV)
 			{
 				moduleHSVSums[index][0] += currentH;
 				moduleHSVSums[index][1] += currentS;
@@ -284,7 +289,6 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 	}
 
 	//for testing purposes
-	/*
 	cv::Mat image = cv::Mat::zeros(code.rows, code.cols, CV_8UC3);
 	for (int r = 0; r < code.rows; r++)
 	{
@@ -299,7 +303,6 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 			}
 		cv::imwrite("average.png", image);
 	}
-	*/
 
 	bool allPaletteInFirstLine = COLOR_NUMBER + 1 < codeSide;
 	int lastPaletteModuleIndex = COLOR_NUMBER + (allPaletteInFirstLine ? 1 : 2);
@@ -330,7 +333,8 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 			//std::std::cout << "current color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
 			//	", r - " << moduleColorAverages[i].r << endl;
 			int paletteIndex = getPaletteIndex(paletteHSV, currentPixelHSV);
-			//std::cout << paletteIndex + 1 << endl;
+			//next line is for testing purposes (comment it out if not needed)
+			std::cout << paletteIndex + 1 << endl;
 			//std::std::cout << "decided module color: " << paletteIndex << endl;
 			colorIndexSequence.push_back(paletteIndex);
 			bitStream.append(getBinaryAsString(paletteIndex).substr(BIT_NUM - BITS_IN_MODULE, BITS_IN_MODULE));
@@ -397,8 +401,8 @@ cv::Mat makeWhiteWhiter(cv::Mat image) {
 
 	int thresholdBright = 100;
 	int thresholdMono = 10;
-	int thresholdL = 60;
-	int thresholdS = 60;
+	int thresholdL = 70;
+	int thresholdS = 40;
 	for (int r = 0; r < image.rows; r++)
 	{
 		for (int c = 0; c < image.cols; c++)
@@ -432,6 +436,21 @@ cv::Mat makeWhiteWhiter(cv::Mat image) {
 	return image;
 }
 
+cv::Mat increaseContrast(cv::Mat image)
+{
+	cv::Mat newImage = cv::Mat::zeros(image.size(), image.type());
+	double alpha = 1.5;
+	int beta = 0;
+	for (int y = 0; y < image.rows; y++) {
+		for (int x = 0; x < image.cols; x++) {
+			for (int c = 0; c < image.channels(); c++) {
+				newImage.at<cv::Vec3b>(y, x)[c] = cv::saturate_cast<uchar>(alpha*image.at<cv::Vec3b>(y, x)[c] + beta);
+			}
+		}
+	}
+	return newImage;
+}
+
 cv::Mat Coder::perspectiveTransform(cv::Mat input)
 {
 	vector<cv::Point2i> inputQuad = getAnglesFromImage(input);
@@ -442,12 +461,15 @@ cv::Mat Coder::perspectiveTransform(cv::Mat input)
 cv::Mat Coder::threasholdImage(cv::Mat img)
 {
 	medianBlur(img, img, 5);
+	cv::imwrite("1_after_blur.png", img);
 
-	double thres = 240;
+	double thres = 250;
 	double color = 255;
 	//threshold(img, img, thres, color, cv::THRESH_BINARY);
 	threshold(img, img, thres, color, cv::THRESH_BINARY);
 	//cv::adaptiveThreshold(img, img, color, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 3, 2);
+	cv::imwrite("2_after_threshold.png", img);
+
 
 	// Execute erosion to improve the detection
 	int erosion_size = 2;
@@ -455,20 +477,23 @@ cv::Mat Coder::threasholdImage(cv::Mat img)
 		cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
 		cv::Point(erosion_size, erosion_size));
 	//erode(img, img, element);
+	cv::imwrite("3_after_erosion.png", img);
 	return img;
 }
 
 vector<cv::Point2i> Coder::getAnglesFromImage(cv::Mat image)
 {
-	//cv::imwrite("anglesFromImage_Before.png", input);
-	image = makeWhiteWhiter(image);
+	cv::imwrite("anglesFromImage_Before.png", image);
+	//image = makeWhiteWhiter(image);
+	image = increaseContrast(image);
+	cv::imwrite("0_after contrast.png", image);
 
 	//gray scaling and thresholding for further angles search
 	cv::Mat grayMat;
 	cv::cvtColor(image, grayMat, cv::COLOR_BGR2GRAY);
 	grayMat = threasholdImage(grayMat);
 
-	//cv::imwrite("anglesFromImage_AfterColor.png", input);
+	cv::imwrite("anglesFromImage_AfterColor.png", image);
 	//cv::imwrite("anglesFromImage_AfterGray.png", grayMat);
 
     vector<cv::Point2i> inputQuad;
@@ -498,7 +523,7 @@ vector<cv::Point2i> Coder::getAnglesFromImage(cv::Mat image)
 		}
 	}
 
-	//x and y for each of 5 points (upper-left, upper-right, lower-right, lower-left, centroid) for each of 4 largest conrours
+	//x and y for each of 5 points (upper-left, upper-right, lower-right, lower-left, centroid) for each of 4 largest contours
 	vector<vector<cv::Vec2i>> countoursImportantPointsCoordinates = {}; //final size should be 4. For now it is not really used, maybe remove later
 
 	cv::Vec2i originUpperLeft = cv::Vec2i(0, 0);
@@ -594,6 +619,7 @@ vector<cv::Point2i> Coder::getAnglesFromImage(cv::Mat image)
 	{
 		circle(image, inputQuad1[i], 5, cv::Scalar(0, 0, 255), 3, 8, 0);
 	}
+	cv::imwrite("4_angles.png", image);
 
 	return inputQuad;
 }
@@ -634,7 +660,7 @@ std::string Coder::decodeStringFromMat(cv::Mat mat)
 	if (transformed.empty()) {
 		return "ERROR";
 	}
-	//cv::imwrite("transformed.png", transformed);
+	cv::imwrite("transformed.png", transformed);
 	string bitStream = getBitStreamFrom2DCode(transformed);
 	std::cout << bitStream << endl;
 	string decoded = decode(bitStream);
@@ -723,10 +749,10 @@ std::string Coder::encode(std::string text)
 		while ((pos = text.find(delimiter)) != std::string::npos) {
 			text.erase(0, pos + delimiter.length());
 		}
-		text = toUpperCase(text);
 		text = DEFAULT_LINK_MARKER + text;
 	}
 
+	text = toUpperCase(text);
 	string encoded = getBinaryAsString(text.size()).substr(BIT_NUM - SHORT_BIT_NUM, SHORT_BIT_NUM); //only 6 bits needed bc max number of encoded bits is 35
 	string encodedMessageOnly = "";
 	for (int i = 0; i < text.size(); i++)
