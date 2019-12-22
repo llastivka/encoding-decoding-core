@@ -7,8 +7,8 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
 
-	//cv::Mat image = imread("for_test2.jpg", cv::IMREAD_COLOR);
-	cv::Mat image = imread("hoseok.png", cv::IMREAD_COLOR);
+	cv::Mat image = imread("for_test5.jpg", cv::IMREAD_COLOR);
+	//cv::Mat image = imread("hoseok.png", cv::IMREAD_COLOR);
 
 	int modulesNumber = 49;
 	Coder decoder = Coder(modulesNumber);
