@@ -1,5 +1,7 @@
 #include "coder.hpp"
 
+#define CV_PI   3.1415926535897932384626433832795
+
 struct Coder::color
 {
 	float r, g, b;
@@ -158,7 +160,7 @@ bool Coder::isLink(string decoded)
 	return decoded.find(Coder::DEFAULT_LINK_MARKER) != std::string::npos;
 }
 
-int Coder::getPaletteIndex(std::vector<Coder::color> palette, std::vector<vector<double>> paletteBgrProportions, Coder::color currentColor)
+int Coder::getPaletteIndex(std::vector<Coder::color> palette, Coder::color currentColor)
 {
 	int index = 0;
 	int bgrMinDiff = 256;
@@ -183,11 +185,12 @@ int Coder::getPaletteIndex(std::vector<Coder::color> palette, std::vector<vector
 		//}
 	}
 
-	if (wasNotChanged)
+	//for testing purposes
+	/*if (wasNotChanged)
 	{
 		int i = 5;
 		int y = i + 1;
-	}
+	}*/
 	//here add check for the case when the minDiff is still too large to be classified correctly
 	return index;
 }
@@ -219,7 +222,9 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 	//imwrite("cohsv.png", codeHSV);
 
 	int threshold = 10;
-	int thresholdHSV = 10;
+	int thresholdHSV = 20;
+	int lightThreshold = 70;
+	int darkThreshold = 70;
 	std::vector<color> moduleColorSums(getModulesNumber());
 	std::vector<int> moduleColorNums(getModulesNumber());
 
@@ -237,7 +242,10 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 			int currentB = code.at<cv::Vec3b>(r, c)[0];
 			int currentG = code.at<cv::Vec3b>(r, c)[1];
 			int currentR = code.at<cv::Vec3b>(r, c)[2];
-			if (abs(currentB - currentG) > threshold || abs(currentB - currentR) > threshold || abs(currentR - currentG) > threshold)
+			bool currentColorHasEnoughChrominance = abs(currentB - currentG) > threshold || abs(currentB - currentR) > threshold || abs(currentR - currentG);
+			bool currentColorIsNotTooDark = currentB > darkThreshold || currentG > darkThreshold || currentR > darkThreshold;
+			bool currentColorIsNotTooLight = currentB < (255 - lightThreshold) || currentG < (255 - lightThreshold) || currentR < (255 - lightThreshold);
+			if (currentColorHasEnoughChrominance && currentColorIsNotTooDark && currentColorIsNotTooLight)
 			{
 				moduleColorSums[index].b += currentB;
 				moduleColorSums[index].g += currentG;
@@ -250,7 +258,7 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 			int currentH = codeHSV.at<cv::Vec3b>(r, c)[0];
 			int currentS = codeHSV.at<cv::Vec3b>(r, c)[1];
 			int currentV = codeHSV.at<cv::Vec3b>(r, c)[2];
-			if (currentS > thresholdHSV)
+			if (currentS > thresholdHSV /*&& currentV > thresholdHSV && currentV < 100 - thresholdHSV*/)
 			{
 				moduleHSVSums[index][0] += currentH;
 				moduleHSVSums[index][1] += currentS;
@@ -272,7 +280,7 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 		//string b = to_string(moduleColorAverages[i].b);
 		//string g = to_string(moduleColorAverages[i].g);
 		//string r = to_string(moduleColorAverages[i].r);
-		//cout << "(" + b + ", " + g + ", " + r + ")" << endl;
+		//std::cout << "(" + b + ", " + g + ", " + r + ")" << endl;
 
 		//hsv version
 		if (moduleHSVNums[i] > 0)
@@ -284,7 +292,6 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 	}
 
 	//for testing purposes
-	/*
 	cv::Mat image = cv::Mat::zeros(code.rows, code.cols, CV_8UC3);
 	for (int r = 0; r < code.rows; r++)
 	{
@@ -292,14 +299,13 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 			{
 			int index = r / moduleSideSize * codeSide + c / moduleSideSize;
 			color pixelColor = moduleColorAverages[index];
-			//cout << index << ": " << pixelColor.b << ", " << pixelColor.g << ", " << pixelColor.r << endl;
+			//std::cout << index << ": " << pixelColor.b << ", " << pixelColor.g << ", " << pixelColor.r << endl;
 			image.at<cv::Vec3b>(r, c)[0] = pixelColor.b;
 			image.at<cv::Vec3b>(r, c)[1] = pixelColor.g;
 			image.at<cv::Vec3b>(r, c)[2] = pixelColor.r;
 			}
 		cv::imwrite("average.png", image);
 	}
-	*/
 
 	bool allPaletteInFirstLine = COLOR_NUMBER + 1 < codeSide;
 	int lastPaletteModuleIndex = COLOR_NUMBER + (allPaletteInFirstLine ? 1 : 2);
@@ -320,18 +326,20 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 			paletteColorAmountInCode.push_back(1); //bc for now it is only palette color itself (of this color)
 			paletteHSV.push_back(moduleHSVAverages[i]);
 
-			//std::cout << "palette color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
+			//std::std::cout << "palette color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
 			//	", r - " << moduleColorAverages[i].r << endl;
 		}
 		else
 		{
-			color currentColor = moduleColorAverages[i];
+			Coder::color currentColor = moduleColorAverages[i];
 			cv::Vec3b currentPixelHSV = moduleHSVAverages[i];
-			//std::cout << "current color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
+			//std::std::cout << "current color: b - " << moduleColorAverages[i].b << ", g - " << moduleColorAverages[i].g <<
 			//	", r - " << moduleColorAverages[i].r << endl;
-			int paletteIndex = getPaletteIndex(paletteHSV, currentPixelHSV);
-			//cout << paletteIndex + 1 << endl;
-			//std::cout << "decided module color: " << paletteIndex << endl;
+			//int paletteIndex = getPaletteIndex(paletteHSV, currentPixelHSV);
+			int paletteIndex = getPaletteIndex(paletteInCode, currentColor);
+			//next line is for testing purposes (comment it out if not needed)
+			std::cout << paletteIndex + 1 << endl;
+			//std::std::cout << "decided module color: " << paletteIndex << endl;
 			colorIndexSequence.push_back(paletteIndex);
 			bitStream.append(getBinaryAsString(paletteIndex).substr(BIT_NUM - BITS_IN_MODULE, BITS_IN_MODULE));
 
@@ -349,7 +357,7 @@ string Coder::getBitStreamFrom2DCode(cv::Mat code)
 }
 
 //perspective transformation and resizing to the square
-cv::Mat Coder::perspectiveTransform(cv::Mat input, vector<cv::Point2f> inputQuad)
+cv::Mat Coder::perspectiveTransform(cv::Mat input, vector<cv::Point2i> inputQuad)
 {
 	/*
 	//increase saturation
@@ -373,10 +381,10 @@ cv::Mat Coder::perspectiveTransform(cv::Mat input, vector<cv::Point2f> inputQuad
 	cv::Mat output = cv::Mat::zeros(codeSideSize, codeSideSize, input.type());
 	cv::Point2f outputQuad[4];
     cv::Point2f inputQuad1[4];
-	outputQuad[0] = cv::Point2f(0, 0);
-	outputQuad[1] = cv::Point2f(output.cols - 1, 0);
-	outputQuad[2] = cv::Point2f(output.cols - 1, output.rows - 1);
-	outputQuad[3] = cv::Point2f(0, output.rows - 1);
+	outputQuad[0] = cv::Point2f((float) 0, (float) 0);
+	outputQuad[1] = cv::Point2f((float) (output.cols - 1), (float) 0);
+	outputQuad[2] = cv::Point2f((float) (output.cols - 1), (float) (output.rows - 1));
+	outputQuad[3] = cv::Point2f((float) 0, (float) (output.rows - 1));
 
     inputQuad1[0] = inputQuad.at(0);
     inputQuad1[1] = inputQuad.at(1);
@@ -432,21 +440,24 @@ cv::Mat makeWhiteWhiter(cv::Mat image) {
 	return image;
 }
 
+cv::Mat increaseContrast(cv::Mat image)
+{
+	cv::Mat newImage = cv::Mat::zeros(image.size(), image.type());
+	double alpha = 1.7;
+	int beta = 0;
+	for (int y = 0; y < image.rows; y++) {
+		for (int x = 0; x < image.cols; x++) {
+			for (int c = 0; c < image.channels(); c++) {
+				newImage.at<cv::Vec3b>(y, x)[c] = cv::saturate_cast<uchar>(alpha*image.at<cv::Vec3b>(y, x)[c] + beta);
+			}
+		}
+	}
+	return newImage;
+}
+
 cv::Mat Coder::perspectiveTransform(cv::Mat input)
 {
-	//input = makeWhiteWhiter(input);
-	//cv::imwrite("anglesFromImage_Before.png", input);
-	input = makeWhiteWhiter(input);
-	
-	//gray scaling and thresholding for further angles search
-	cv::Mat grayMat;
-	cv::cvtColor(input, grayMat, cv::COLOR_BGR2GRAY);
-	grayMat = threasholdImage(grayMat);
-
-	//cv::imwrite("anglesFromImage_AfterColor.png", input);
-	//cv::imwrite("anglesFromImage_AfterGray.png", grayMat);
-
-    vector<cv::Point2f> inputQuad = getAnglesFromImage(input, grayMat);
+	vector<cv::Point2i> inputQuad = getAnglesFromImageAlternatively(input);
 	//cv::imwrite("circled.png", input);
 	return perspectiveTransform(input, inputQuad);
 }
@@ -454,31 +465,394 @@ cv::Mat Coder::perspectiveTransform(cv::Mat input)
 cv::Mat Coder::threasholdImage(cv::Mat img)
 {
 	medianBlur(img, img, 5);
+	cv::imwrite("1_after_blur.png", img);
+
 
 	double thres = 240;
 	double color = 255;
 	//threshold(img, img, thres, color, cv::THRESH_BINARY);
 	threshold(img, img, thres, color, cv::THRESH_BINARY);
 	//cv::adaptiveThreshold(img, img, color, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 3, 2);
+	cv::imwrite("2_after_threshold.png", img);
+
 
 	// Execute erosion to improve the detection
-	int erosion_size = 2;
+	int erosion_size = 3;
 	cv::Mat element = getStructuringElement(cv::MORPH_CROSS,
 		cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
 		cv::Point(erosion_size, erosion_size));
 	//erode(img, img, element);
+	cv::imwrite("3_after_erosion.png", img);
 	return img;
 }
 
-vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
+vector<cv::Vec2f> calculateHorizontalHoughLines(cv::Mat src, bool needHorizontalLines)
 {
+	cv::Mat dst, cdst;
+	cv::Canny(src, dst, 50, 200, 3);
+	cv::cvtColor(dst, cdst, cv::COLOR_GRAY2BGR);
+	vector<cv::Vec2f> result;
+	cv::HoughLines(dst, result, 1, CV_PI / 180, 130, 0, 0);
 
-    vector<cv::Point2f> inputQuad;
+	vector<cv::Vec2f> horizontalLines;
+	vector<cv::Vec2f> verticalLines;
+	for (int i = 0; i < result.size(); i++)
+	{
+		float rho = result[i][0], theta = result[i][1];
+		cv::Point pt1, pt2;
+		double a = cos(theta), b = sin(theta);
+		double x0 = a * rho, y0 = b * rho;
+		pt1.x = cvRound(x0 + 10000 * (-b));
+		pt1.y = cvRound(y0 + 10000 * (a));
+		pt2.x = cvRound(x0 - 10000 * (-b));
+		pt2.y = cvRound(y0 - 10000 * (a));
+		double angle = atan2(pt2.y - pt1.y, pt2.x - pt1.x) * 180.0 / CV_PI;
+		bool horizontal = abs(angle) < 45.0 || abs(angle) > 135.0;
+		if (needHorizontalLines && horizontal)
+		{
+			horizontalLines.push_back(result[i]);
+		}
+		else if (!needHorizontalLines && !horizontal)
+		{
+			verticalLines.push_back(result[i]);
+		}
+	}
+
+	return needHorizontalLines ? horizontalLines : verticalLines;
+}
+
+void drawLines(cv::Mat img, vector<cv::Vec2f> lines) {
+	for (size_t i = 0; i < lines.size(); i++)
+	{
+		float rho = lines[i][0], theta = lines[i][1];
+		cv::Point pt1, pt2;
+		double a = cos(theta), b = sin(theta);
+		double x0 = a * rho, y0 = b * rho;
+		pt1.x = cvRound(x0 + 10000 * (-b));
+		pt1.y = cvRound(y0 + 10000 * (a));
+		pt2.x = cvRound(x0 - 10000 * (-b));
+		pt2.y = cvRound(y0 - 10000 * (a));
+		cv::line(img, pt1, pt2, cv::Scalar(255, 0, 0), 3, cv::LINE_AA);
+	}
+}
+
+bool pointOnTheLine(cv::Vec2f line, int x, int y)
+{
+	float rho = line[0], theta = line[1];
+	cv::Point pt1, pt2;
+	double a = cos(theta), b = sin(theta);
+	double x0 = a * rho, y0 = b * rho;
+	pt1.x = cvRound(x0 + 10000 * (-b));
+	pt1.y = cvRound(y0 + 10000 * (a));
+	pt2.x = cvRound(x0 - 10000 * (-b));
+	pt2.y = cvRound(y0 - 10000 * (a));
+
+	std::vector<int> vector1 = { pt2.x - pt1.x, pt2.y - pt1.y };
+	std::vector<int> vector2 = { pt2.x - x, pt2.y - y };
+	int crossProdut = vector1[0] * vector2[1] - vector1[1] * vector2[0];
+	return crossProdut > -500000 && crossProdut < 500000;
+	/*
+	double yDiff = pt1.y - pt2.y;
+	double xDiff = pt2.x - pt1.x;
+	double c = pt1.x * pt2.y - pt2.x * pt1.y;
+	return abs(yDiff * x + xDiff * y + c) / sqrt(a * yDiff + xDiff * xDiff) < 20;
+	*/
+}
+
+cv::Point2i getMostCornerPoint(cv::Point2i originCornerPoint, vector<cv::Point> cornerArea)
+{
+	double minDistance = DBL_MAX; //first setting it to a big number so at least one point was chosen
+	cv::Point2i cornerPoint;
+
+	for (int i = 0; i < cornerArea.size(); i++)
+	{
+		cv::Point2i currentPoint = cornerArea[i];
+		double currentDistance = pow(currentPoint.x - originCornerPoint.x, 2) + pow(currentPoint.y - originCornerPoint.y, 2);
+		if (currentDistance < minDistance)
+		{
+			minDistance = currentDistance;
+			cornerPoint = currentPoint;
+		}
+	}
+
+	return cornerPoint;
+}
+
+cv::Point2i getCornerPoint(vector<vector<cv::Point>> cornerAreas, int cornerOrder, int cols, int rows)
+{
+	const int UPPER_LEFT_CORNER = 0, UPPER_RIGHT_CORNER = 1, LOWER_RIGHT_CORNER = 2, LOWER_LEFT_CORNER = 3;
+	vector<cv::Point> cornerArea;
+	for (int i = 0; i < cornerAreas.size(); i++)
+	{
+		int countOfGreaterXs = 0;
+		int countOfGreaterYs = 0;
+		for (int j = 0; j < cornerAreas.size(); j++)
+		{
+			if (cornerAreas[i][0].x < cornerAreas[j][0].x)
+			{
+				countOfGreaterXs++;
+			}
+			if (cornerAreas[i][0].y < cornerAreas[j][0].y)
+			{
+				countOfGreaterYs++;
+			}
+		}
+		if (cornerOrder == UPPER_LEFT_CORNER && countOfGreaterXs >= 2 && countOfGreaterYs >= 2)
+		{
+			cornerArea = cornerAreas[i];
+			break;
+		}
+		else if (cornerOrder == UPPER_RIGHT_CORNER && countOfGreaterXs <= 1 && countOfGreaterYs >= 2)
+		{
+			cornerArea = cornerAreas[i];
+			break;
+		}
+		else if (cornerOrder == LOWER_RIGHT_CORNER && countOfGreaterXs <= 1 && countOfGreaterYs <= 1)
+		{
+			cornerArea = cornerAreas[i];
+			break;
+		}
+		else if (cornerOrder == LOWER_LEFT_CORNER && countOfGreaterXs >=2 && countOfGreaterYs <= 1)
+		{
+			cornerArea = cornerAreas[i];
+			break;
+		}
+	}
+
+	cv::Point2i originCornerPoint;
+	switch (cornerOrder) {
+	case UPPER_LEFT_CORNER:
+		originCornerPoint = cv::Point2i(0, 0);
+		break;
+	case UPPER_RIGHT_CORNER:
+		originCornerPoint = cv::Point2i(cols - 1, 0);
+		break;
+	case LOWER_RIGHT_CORNER:
+		originCornerPoint = cv::Point2i(cols - 1, rows - 1);
+		break;
+	case LOWER_LEFT_CORNER:
+		originCornerPoint = cv::Point2i(0, rows - 1);
+		break;
+	default:
+		break;
+	}
+	
+	return getMostCornerPoint(originCornerPoint, cornerArea);
+}
+
+bool needHorizontalLines(vector<cv::Point> area1, vector<cv::Point> area2, int cols, int rows)
+{
+	bool left = false, right = false, bottom = false, top = false;
+	if (area1[0].x >= cols / 2 && area2[0].x >= cols / 2)
+	{
+		right = true;
+	}
+	else if (area1[0].x <= cols / 2 && area2[0].x <= cols / 2)
+	{
+		left = true;
+	}
+	else if (area1[0].y >= rows / 2 && area2[0].y >= rows / 2)
+	{
+		bottom = true;
+	}
+	else if (area1[0].y <= rows / 2 && area2[0].y <= rows / 2)
+	{
+		top = true;
+	}
+
+	return left || right;
+}
+
+vector<cv::Point2i> Coder::getAnglesFromImageAlternatively(cv::Mat image)
+{
+	cv::imwrite("anglesFromImage_Before.png", image);
+	//image = makeWhiteWhiter(image);
+	image = increaseContrast(image);
+	cv::imwrite("0_after contrast.png", image);
+
+	//gray scaling and thresholding for further angles search
+	cv::Mat grayMat;
+	cv::cvtColor(image, grayMat, cv::COLOR_BGR2GRAY);
+	grayMat = threasholdImage(grayMat);
+
+	cv::imwrite("anglesFromImage_AfterColor.png", image);
+	//cv::imwrite("anglesFromImage_AfterGray.png", grayMat);
+
+	vector<cv::Point2i> inputQuad;
 	vector<cv::Vec2i> angles = {};
 
 	vector<vector<cv::Point>> contours; // Vector for storing contour
 	vector<cv::Vec4i> hierarchy;
-	findContours(imageGray, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
+	findContours(grayMat, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
+
+	if (contours.size() > 4)
+	{
+		//finding largest white areas (kinda sorting)
+		vector<double> largestArea(contours.size(), 0.0);
+		vector<int> largestContourIndexes(contours.size(), 0);
+		for (int i = 0; i < contours.size(); i++) // iterate through each contour. 
+		{
+			double a = contourArea(contours[i], false);  //  Find the area of contour
+			for (int j = 0; j < i + 1; j++)
+			{
+				if (a > largestArea[j]) {
+					largestArea.insert(largestArea.begin() + j, a);
+					//for inserting with shift of other elements, refactor later
+					for (int k = largestContourIndexes.size() - 1; k > j; k--)
+					{
+						largestContourIndexes[k] = largestContourIndexes[k - 1];
+					}
+					largestContourIndexes[j] = i; //Store the index of largest contour
+					break;
+				}
+			}
+		}
+
+		vector<cv::Vec2f> lines = calculateHorizontalHoughLines(grayMat, needHorizontalLines(contours[largestContourIndexes[0]], 
+			contours[largestContourIndexes[1]], image.cols, image.rows));
+
+		//finding all the lines that are connected to the 2 largest white areas
+		vector<cv::Vec2f> largestSquaresLines1;
+
+		vector<cv::Point> whiteArea1 = contours.at(largestContourIndexes[0]);
+		for (int j = 0; j < whiteArea1.size(); j++)
+		{
+			int pointX = whiteArea1.at(j).x;
+			int pointY = whiteArea1.at(j).y;
+			for (int k = 0; k < lines.size(); k++)
+			{
+				if (std::find(largestSquaresLines1.begin(), largestSquaresLines1.end(), lines[k]) == largestSquaresLines1.end())
+				{
+					if (pointOnTheLine(lines[k], pointX, pointY))
+					{
+						largestSquaresLines1.push_back(lines[k]);
+						break;
+					}
+				}
+			}
+		}
+
+		vector<cv::Vec2f> largestSquaresLines2;
+		vector<cv::Point> whiteArea2 = contours.at(largestContourIndexes[1]);
+		for (int j = 0; j < whiteArea2.size(); j++)
+		{
+			int pointX = whiteArea2.at(j).x;
+			int pointY = whiteArea2.at(j).y;
+			for (int k = 0; k < lines.size(); k++)
+			{
+				if (std::find(largestSquaresLines2.begin(), largestSquaresLines2.end(), lines[k]) == largestSquaresLines2.end())
+				{
+					if (pointOnTheLine(lines[k], pointX, pointY))
+					{
+						largestSquaresLines2.push_back(lines[k]);
+						break;
+					}
+				}
+			}
+		}
+
+		drawLines(grayMat, largestSquaresLines1);
+		drawLines(grayMat, largestSquaresLines2);
+		cv::imwrite("lines.png", grayMat);
+
+		/*
+		//removing common lines
+		for (int i = 0; i < largestSquaresLines1.size(); i++)
+		{
+			if (std::find(largestSquaresLines2.begin(), largestSquaresLines2.end(), largestSquaresLines1[i]) != largestSquaresLines2.end())
+			{
+				largestSquaresLines2.erase(std::remove(largestSquaresLines2.begin(), largestSquaresLines2.end(), largestSquaresLines1[i]), largestSquaresLines2.end());
+				largestSquaresLines1.erase(largestSquaresLines1.begin() + i);
+				i--;
+			}
+		}
+		*/
+
+		vector<vector<cv::Point>> cornerAreas;
+		cornerAreas.push_back(contours[largestContourIndexes[0]]);
+		cornerAreas.push_back(contours[largestContourIndexes[1]]);
+		for (int i = 2; i < largestContourIndexes.size(); i++)
+		{
+			vector<cv::Point> currentArea = contours[largestContourIndexes[i]];
+			bool currentAreaStatus = false;
+			for (int j = 0; j < currentArea.size(); j++)
+			{
+				int pointX = currentArea.at(j).x;
+				int pointY = currentArea.at(j).y;
+				for (int k = 0; k < largestSquaresLines1.size(); k++)
+				{
+					if (pointOnTheLine(largestSquaresLines1[k], pointX, pointY))
+					{
+						cornerAreas.push_back(contours[largestContourIndexes[i]]);
+						currentAreaStatus = true;
+						break;
+					}
+
+				}
+				if (currentAreaStatus)
+				{
+					break;
+				}
+				for (int k = 0; k < largestSquaresLines2.size(); k++)
+				{
+					if (pointOnTheLine(largestSquaresLines2[k], pointX, pointY))
+					{
+						cornerAreas.push_back(contours[largestContourIndexes[i]]);
+						currentAreaStatus = true;
+						break;
+					}
+
+				}
+			}
+			if (cornerAreas.size() == 4) {
+				break;
+			}
+		}
+
+		inputQuad.push_back(getCornerPoint(cornerAreas, 0, image.cols, image.rows));
+		inputQuad.push_back(getCornerPoint(cornerAreas, 1, image.cols, image.rows));
+		inputQuad.push_back(getCornerPoint(cornerAreas, 2, image.cols, image.rows));
+		inputQuad.push_back(getCornerPoint(cornerAreas, 3, image.cols, image.rows));
+
+	}
+	else
+	{
+		inputQuad.push_back(getCornerPoint(contours, 0, image.cols, image.rows));
+		inputQuad.push_back(getCornerPoint(contours, 1, image.cols, image.rows));
+		inputQuad.push_back(getCornerPoint(contours, 2, image.cols, image.rows));
+		inputQuad.push_back(getCornerPoint(contours, 3, image.cols, image.rows));
+	}
+	//for testing purposes
+	for (int i = 0; i < 4; i++)
+	{
+		circle(image, inputQuad[i], 5, cv::Scalar(0, 0, 255), 3, 8, 0);
+	}
+	cv::imwrite("4_angles.png", image);
+
+	return inputQuad;
+}
+
+vector<cv::Point2i> Coder::getAnglesFromImage(cv::Mat image)
+{
+	cv::imwrite("anglesFromImage_Before.png", image);
+	//image = makeWhiteWhiter(image);
+	image = increaseContrast(image);
+	cv::imwrite("0_after contrast.png", image);
+
+	//gray scaling and thresholding for further angles search
+	cv::Mat grayMat;
+	cv::cvtColor(image, grayMat, cv::COLOR_BGR2GRAY);
+	grayMat = threasholdImage(grayMat);
+
+	cv::imwrite("anglesFromImage_AfterColor.png", image);
+	//cv::imwrite("anglesFromImage_AfterGray.png", grayMat);
+
+    vector<cv::Point2i> inputQuad;
+	vector<cv::Vec2i> angles = {};
+
+	vector<vector<cv::Point>> contours; // Vector for storing contour
+	vector<cv::Vec4i> hierarchy;
+	findContours(grayMat, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
 
 	vector<double> largestArea = { 0, 0, 0, 0 };
 	vector<int> largestContourIndexes = { 0, 0, 0, 0 };
@@ -500,7 +874,7 @@ vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
 		}
 	}
 
-	//x and y for each of 5 points (upper-left, upper-right, lower-right, lower-left, centroid) for each of 4 largest conrours
+	//x and y for each of 5 points (upper-left, upper-right, lower-right, lower-left, centroid) for each of 4 largest contours
 	vector<vector<cv::Vec2i>> countoursImportantPointsCoordinates = {}; //final size should be 4. For now it is not really used, maybe remove later
 
 	cv::Vec2i originUpperLeft = cv::Vec2i(0, 0);
@@ -509,10 +883,10 @@ vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
 	cv::Vec2i originLowerLeft = cv::Vec2i(0, image.rows - 1);
 
 	//here are the opposite values in order to at least one of the real values could be set
-	cv::Point2f generalUpperLeft = cv::Point2f(image.cols - 1, image.rows - 1);
-	cv::Point2f generalUpperRight = cv::Point2f(0, image.rows - 1);
-	cv::Point2f generalLowerRight = cv::Point2f(0, 0);
-	cv::Point2f generalLowerLeft = cv::Point2f(image.cols - 1, 0);
+	cv::Point2i generalUpperLeft = cv::Point2i(image.cols - 1, image.rows - 1);
+	cv::Point2i generalUpperRight = cv::Point2i(0, image.rows - 1);
+	cv::Point2i generalLowerRight = cv::Point2i(0, 0);
+	cv::Point2i generalLowerLeft = cv::Point2i(image.cols - 1, 0);
 	for (int i = 0; i < largestContourIndexes.size(); i++)
 	{
 		int maxX = 0;
@@ -524,7 +898,7 @@ vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
 		{
 			int x = contours[largestContourIndexes[i]][j].x;
 			int y = contours[largestContourIndexes[i]][j].y;
-			//cout << "x: " << x << "     y: " << y << endl;
+			//std::cout << "x: " << x << "     y: " << y << endl;
 			if (x > maxX)
 			{
 				maxX = x;
@@ -542,7 +916,7 @@ vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
 				minY = y;
 			}
 		}
-		//cout << i << "(" << largestContourIndexes[i] << "): minX = " << minX << ", maxX = " << maxX << ", minY = " << minY << ", maxY = " << maxY << endl;
+		//std::cout << i << "(" << largestContourIndexes[i] << "): minX = " << minX << ", maxX = " << maxX << ", minY = " << minY << ", maxY = " << maxY << endl;
 		cv::Vec2i upperLeft = cv::Vec2i(minX, minY);
 		cv::Vec2i upperRight = cv::Vec2i(maxX, minY);
 		cv::Vec2i lowerRight = cv::Vec2i(maxX, maxY);
@@ -573,29 +947,30 @@ vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
 
 		//for testing purposes
 		/*
-		inputQuad[0] = Point2f(generalUpperLeft.x, generalUpperLeft.y);
-		inputQuad[1] = Point2f(generalUpperRight.x, generalUpperRight.y);
-		inputQuad[2] = Point2f(generalLowerRight.x, generalLowerRight.y);
-		inputQuad[3] = Point2f(generalUpperLeft.x, generalLowerLeft.y);
+		inputQuad[0] = Point2i(generalUpperLeft.x, generalUpperLeft.y);
+		inputQuad[1] = Point2i(generalUpperRight.x, generalUpperRight.y);
+		inputQuad[2] = Point2i(generalLowerRight.x, generalLowerRight.y);
+		inputQuad[3] = Point2i(generalUpperLeft.x, generalLowerLeft.y);
 		*/
 	}
 
 	//for now i'll just assign it but i'll have to rewrite it eventually
-	inputQuad.push_back(cv::Point2f(generalUpperLeft.x, generalUpperLeft.y));
-	inputQuad.push_back(cv::Point2f(generalUpperRight.x, generalUpperRight.y));
-	inputQuad.push_back(cv::Point2f(generalLowerRight.x, generalLowerRight.y));
-	inputQuad.push_back(cv::Point2f(generalLowerLeft.x, generalLowerLeft.y));
+	inputQuad.push_back(cv::Point2i(generalUpperLeft.x, generalUpperLeft.y));
+	inputQuad.push_back(cv::Point2i(generalUpperRight.x, generalUpperRight.y));
+	inputQuad.push_back(cv::Point2i(generalLowerRight.x, generalLowerRight.y));
+	inputQuad.push_back(cv::Point2i(generalLowerLeft.x, generalLowerLeft.y));
 
-	cv::Point2f inputQuad1[4];
-	inputQuad1[0] = cv::Point2f(generalUpperLeft.x, generalUpperLeft.y);
-	inputQuad1[1] = cv::Point2f(generalUpperRight.x, generalUpperRight.y);
-	inputQuad1[2] = cv::Point2f(generalLowerRight.x, generalLowerRight.y);
-	inputQuad1[3] = cv::Point2f(generalLowerLeft.x, generalLowerLeft.y);
+	cv::Point2i inputQuad1[4];
+	inputQuad1[0] = cv::Point2i(generalUpperLeft.x, generalUpperLeft.y);
+	inputQuad1[1] = cv::Point2i(generalUpperRight.x, generalUpperRight.y);
+	inputQuad1[2] = cv::Point2i(generalLowerRight.x, generalLowerRight.y);
+	inputQuad1[3] = cv::Point2i(generalLowerLeft.x, generalLowerLeft.y);
 
 	for (int i = 0; i < 4; i++)
 	{
 		circle(image, inputQuad1[i], 5, cv::Scalar(0, 0, 255), 3, 8, 0);
 	}
+	cv::imwrite("4_angles.png", image);
 
 	return inputQuad;
 }
@@ -606,11 +981,11 @@ cv::Mat Coder::createMat(int8_t* image, int32_t rows, int32_t cols) {
 }
 
 std::string Coder::decodeMessageFromImage(int8_t* image, int32_t rows, int32_t cols, vector<int32_t> xInputQuad, vector<int32_t> yInputQuad) {
-//	cv::Point2f inputQuad[4];
-//	inputQuad[0] = cv::Point2f(xInputQuad[0], yInputQuad[0]);
-//	inputQuad[1] = cv::Point2f(xInputQuad[1], yInputQuad[1]);
-//	inputQuad[2] = cv::Point2f(xInputQuad[2], yInputQuad[2]);
-//	inputQuad[3] = cv::Point2f(xInputQuad[3], yInputQuad[3]);
+//	cv::Point2i inputQuad[4];
+//	inputQuad[0] = cv::Point2i(xInputQuad[0], yInputQuad[0]);
+//	inputQuad[1] = cv::Point2i(xInputQuad[1], yInputQuad[1]);
+//	inputQuad[2] = cv::Point2i(xInputQuad[2], yInputQuad[2]);
+//	inputQuad[3] = cv::Point2i(xInputQuad[3], yInputQuad[3]);
 //
 //	//int8_t* imageArr = &image[0];
 //
@@ -619,7 +994,7 @@ std::string Coder::decodeMessageFromImage(int8_t* image, int32_t rows, int32_t c
 //		imageMat = createMat(image, rows, cols);
 //	}
 //	catch (exception& e) {
-//		cout << e.what() << '\n';
+//		std::cout << e.what() << '\n';
 //		throw;
 //	}
 //
@@ -637,8 +1012,114 @@ std::string Coder::decodeStringFromMat(cv::Mat mat)
 		return "ERROR";
 	}
 	cv::imwrite("transformed.png", transformed);
+	transformed = gradientBrightness(transformed);
+	cv::imwrite("transformed_brightened.png", transformed);
 	string bitStream = getBitStreamFrom2DCode(transformed);
-	cout << bitStream << endl;
+	std::cout << bitStream << endl;
+	string decoded = decode(bitStream);
+	return decoded;
+}
+
+cv::Mat Coder::gradientBrightness(cv::Mat image)
+{
+	Coder::color cornerModuleAverage[4];
+	cornerModuleAverage[0] = getCornerModuleAverage(image, 0, 0);
+	cornerModuleAverage[1] = getCornerModuleAverage(image, moduleSideSize * (codeSide - 1), 0);
+	cornerModuleAverage[2] = getCornerModuleAverage(image, moduleSideSize * (codeSide - 1), moduleSideSize * (codeSide - 1));
+	cornerModuleAverage[3] = getCornerModuleAverage(image, 0, moduleSideSize * (codeSide - 1));
+	
+	//calculation of average closeness to max luminance of each rgb color
+	int averageClosenessToMaxLuminance[4];
+	averageClosenessToMaxLuminance[0] = getAverageClosenessToMaxLuminance(cornerModuleAverage[0].b, cornerModuleAverage[0].g, cornerModuleAverage[0].r);
+	averageClosenessToMaxLuminance[1] = getAverageClosenessToMaxLuminance(cornerModuleAverage[1].b, cornerModuleAverage[1].g, cornerModuleAverage[1].r);
+	averageClosenessToMaxLuminance[2] = getAverageClosenessToMaxLuminance(cornerModuleAverage[2].b, cornerModuleAverage[2].g, cornerModuleAverage[2].r);
+	averageClosenessToMaxLuminance[3] = getAverageClosenessToMaxLuminance(cornerModuleAverage[3].b, cornerModuleAverage[3].g, cornerModuleAverage[3].r);
+
+	int leftAverage = (averageClosenessToMaxLuminance[0] + averageClosenessToMaxLuminance[3]) / 2;
+	int rightAverage = (averageClosenessToMaxLuminance[1] + averageClosenessToMaxLuminance[2]) / 2;
+	int topAverage = (averageClosenessToMaxLuminance[0] + averageClosenessToMaxLuminance[1]) / 2;
+	int bottomAverage = (averageClosenessToMaxLuminance[2] + averageClosenessToMaxLuminance[3]) / 2;
+
+	int horizontalDirection = rightAverage > leftAverage ? 1 : -1;
+	int horizontalMax = rightAverage > leftAverage ? rightAverage : leftAverage;
+	double horizontalDiff = abs(leftAverage - rightAverage) / 255.0;
+	int verticalDirection = bottomAverage > topAverage ? 1 : -1;
+	int verticalMax = bottomAverage > topAverage ? bottomAverage : topAverage;
+	double verticalDiff = abs(topAverage - bottomAverage) / 255.0;
+
+		
+	cv::Mat newImage = cv::Mat::zeros(image.size(), image.type());
+	double alpha = 1.0;
+	double alphaDiff;
+	int beta = 0;
+	for (int y = 0; y < image.rows; y++) {
+		for (int x = 0; x < image.cols; x++) {
+			for (int c = 0; c < image.channels(); c++) {
+				alphaDiff = 0.5 + 3 * (horizontalDirection * (horizontalDiff * (double) x / (double) codeSideSize) + verticalDirection * (verticalDiff * (double) y / (double) codeSideSize));
+				newImage.at<cv::Vec3b>(y, x)[c] = cv::saturate_cast<uchar> ((alpha + alphaDiff) * image.at<cv::Vec3b>(y, x)[c] + beta);
+			}
+		}
+	}
+	return newImage;
+}
+
+int Coder::getAverageClosenessToMaxLuminance(int b, int g, int r)
+{
+	int max = 255;
+	return (max - b + max - g + max - r) / 3;
+}
+
+Coder::color Coder::getCornerModuleAverage(cv::Mat image, int startX, int startY)
+{
+	int bSum = 0, gSum = 0, rSum = 0;
+	for (int r = startY; r < startY + moduleSideSize; r++)
+	{
+		for (int c = startX; c < startX + moduleSideSize; c++)
+		{
+			bSum += image.at<cv::Vec3b>(r, c)[0];
+			gSum += image.at<cv::Vec3b>(r, c)[1];
+			rSum += image.at<cv::Vec3b>(r, c)[2];
+		}
+	}
+	Coder::color average;
+	average.b = bSum / (moduleSideSize * moduleSideSize);
+	average.g = gSum / (moduleSideSize * moduleSideSize);
+	average.r = rSum / (moduleSideSize * moduleSideSize);
+	return average;
+}
+
+std::vector<int> Coder::getCorners(cv::Mat mat)
+{
+	std::vector<cv::Point2i> inputQuad = getAnglesFromImage(mat);
+	std::vector<int> corners;
+	for (int i = 0; i < inputQuad.size(); i++)
+	{
+		corners.push_back(inputQuad.at(i).x);
+		corners.push_back(inputQuad.at(i).y);
+	}
+	return corners;
+}
+
+std::string Coder::decodeStringFromMatWithCorners(cv::Mat mat, vector<int> corners)
+{
+	vector<cv::Point2i> cornersQuad { cv::Point2i(0, 0), cv::Point2i(0, 0), cv::Point2i(0, 0), cv::Point2i(0, 0) };
+	cornersQuad[0].x = corners[0];
+	cornersQuad[0].y = corners[1];
+	cornersQuad[1].x = corners[2];
+	cornersQuad[1].y = corners[3];
+	cornersQuad[2].x = corners[4];
+	cornersQuad[2].y = corners[5];
+	cornersQuad[3].x = corners[6];
+	cornersQuad[3].y = corners[7];
+
+	//cv::imwrite("circled.png", input);
+	cv::Mat transformed = perspectiveTransform(mat, cornersQuad);
+	if (transformed.empty()) {
+		return "ERROR";
+	}
+	//cv::imwrite("transformed.png", transformed);
+	string bitStream = getBitStreamFrom2DCode(transformed);
+	std::cout << bitStream << endl;
 	string decoded = decode(bitStream);
 	return decoded;
 }
@@ -689,10 +1170,10 @@ std::string Coder::encode(std::string text)
 		while ((pos = text.find(delimiter)) != std::string::npos) {
 			text.erase(0, pos + delimiter.length());
 		}
-		text = toUpperCase(text);
 		text = DEFAULT_LINK_MARKER + text;
 	}
 
+	text = toUpperCase(text);
 	string encoded = getBinaryAsString(text.size()).substr(BIT_NUM - SHORT_BIT_NUM, SHORT_BIT_NUM); //only 6 bits needed bc max number of encoded bits is 35
 	string encodedMessageOnly = "";
 	for (int i = 0; i < text.size(); i++)
@@ -700,19 +1181,19 @@ std::string Coder::encode(std::string text)
 		if (i != text.size() - 1)
 		{
 			int pairFirst = encodingAlphanumericValuesMap.find(text[i])->second;
-			cout << "pairFirst: " << pairFirst << endl;
+			std::cout << "pairFirst: " << pairFirst << endl;
 			int pairSecond = encodingAlphanumericValuesMap.find(text[++i])->second;
-			cout << "pairSecond: " << pairSecond << endl;
+			std::cout << "pairSecond: " << pairSecond << endl;
 			string encodedPair = getBinaryAsString(45 * pairFirst + pairSecond);
 			encoded.append(encodedPair);
 			encodedMessageOnly.append(encodedPair);
-			cout << "encoded together: " << getBinaryAsString(45 * pairFirst + pairSecond) << endl;
+			std::cout << "encoded together: " << getBinaryAsString(45 * pairFirst + pairSecond) << endl;
 		}
 		else
 		{
 			int last = encodingAlphanumericValuesMap.find(text[i])->second;
 			string binary = getBinaryAsString(last);
-			cout << "last: " << last << " - " << getBinaryAsString(last) << endl;
+			std::cout << "last: " << last << " - " << getBinaryAsString(last) << endl;
 			encoded.append(binary.substr(BIT_NUM - SHORT_BIT_NUM, SHORT_BIT_NUM));
 		}
 	}
@@ -741,7 +1222,7 @@ string Coder::encodeErrorCorrectionCodeword(vector<int> codeword)
 	for (int value : codeword)
 	{
 		encodedErrorCorrection.append(getBinaryAsString(value).substr(BIT_NUM - BYTE_BIT_NUM, BYTE_BIT_NUM));
-		cout << "code correction: " << getBinaryAsString(value).substr(BIT_NUM - BYTE_BIT_NUM, BYTE_BIT_NUM) << endl;
+		std::cout << "code correction: " << getBinaryAsString(value).substr(BIT_NUM - BYTE_BIT_NUM, BYTE_BIT_NUM) << endl;
 	}
 	return encodedErrorCorrection;
 }
@@ -790,7 +1271,7 @@ cv::Mat Coder::create2DCode(string bitString)
 		{
 			int index = r / moduleSideSize * codeSide + c / moduleSideSize;
 			color pixelColor = colorSequence[index];
-			//cout << index << ": " << pixelColor.b << ", " << pixelColor.g << ", " << pixelColor.r << endl;
+			//std::cout << index << ": " << pixelColor.b << ", " << pixelColor.g << ", " << pixelColor.r << endl;
 			image.at<cv::Vec3b>(r, c)[0] = pixelColor.b;
 			image.at<cv::Vec3b>(r, c)[1] = pixelColor.g;
 			image.at<cv::Vec3b>(r, c)[2] = pixelColor.r;
